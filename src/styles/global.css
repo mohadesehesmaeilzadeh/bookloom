@@ -1237,6 +1237,134 @@ button.rating-star {
   font-size: 1.08rem;
 }
 
+.recommendation-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+}
+
+.recommendation-entry h2,
+.recommendation-entry p {
+  margin: 0;
+}
+
+.recommendation-entry h2 {
+  color: var(--color-text);
+  font-size: 1.15rem;
+  line-height: 1.6;
+}
+
+.recommendation-entry p,
+.recommendation-entry span,
+.mode-description {
+  color: var(--color-text-muted);
+  line-height: 1.8;
+}
+
+.recommendation-entry span {
+  display: inline-block;
+  margin-top: var(--space-2);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.recommendation-modal {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.recommendation-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.mode-description {
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-soft);
+}
+
+.recommendation-result {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.recommendation-meta,
+.score-breakdown dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.recommendation-meta div,
+.score-breakdown dl div {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-soft);
+}
+
+.recommendation-meta dt,
+.score-breakdown dt {
+  color: var(--color-text-muted);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.recommendation-meta dd,
+.score-breakdown dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.recommendation-reasons {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.recommendation-reasons h4,
+.recommendation-reasons ul,
+.score-breakdown strong {
+  margin: 0;
+}
+
+.recommendation-reasons h4 {
+  color: var(--color-text);
+  font-size: 1rem;
+}
+
+.recommendation-reasons ul {
+  display: grid;
+  gap: var(--space-2);
+  padding-inline-start: var(--space-5);
+  color: var(--color-text-muted);
+  line-height: 1.9;
+}
+
+.score-breakdown {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-soft);
+}
+
+.score-breakdown strong {
+  color: var(--color-text);
+}
+
 .confirm-dialog {
   display: grid;
   gap: var(--space-5);
@@ -1359,8 +1487,15 @@ button.rating-star {
 
   .dashboard-item-header,
   .dashboard-list-item,
-  .category-list li {
+  .category-list li,
+  .recommendation-entry {
     flex-direction: column;
+  }
+
+  .recommendation-controls,
+  .recommendation-meta,
+  .score-breakdown dl {
+    grid-template-columns: 1fr;
   }
 
   .monthly-row {

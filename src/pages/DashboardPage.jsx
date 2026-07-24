@@ -12,6 +12,7 @@ import ReadingPagesSummary from '../components/dashboard/ReadingPagesSummary'
 import RecentActivityList from '../components/dashboard/RecentActivityList'
 import RecentBooksList from '../components/dashboard/RecentBooksList'
 import StatisticCard from '../components/dashboard/StatisticCard'
+import RecommendationEntryCard from '../components/recommendations/RecommendationEntryCard'
 import { ROUTES } from '../constants/routes'
 import { useBooksContext } from '../context/useBooksContext'
 import { useReadingGoal } from '../hooks/useReadingGoal'
@@ -169,6 +170,7 @@ function DashboardPage() {
       </section>
 
       <ReadingPagesSummary summary={dashboardData.pagesSummary} />
+      <RecommendationEntryCard onFeedback={setFeedback} />
       <DailyQuoteCard quoteItem={dashboardData.dailyQuote} />
       <MonthlyFinishedSummary months={dashboardData.monthlyFinished} />
       <RecentActivityList activities={dashboardData.recentActivity} />

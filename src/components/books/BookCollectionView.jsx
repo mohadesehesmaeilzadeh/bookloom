@@ -23,6 +23,7 @@ function BookCollectionView({
   initialSort = BOOK_SORT.NEWEST,
   noResultsDescription = 'جست‌وجو یا فیلترها را تغییر بده.',
   noResultsTitle = 'کتابی با این جست‌وجو یا فیلترها پیدا نشد.',
+  renderHeaderActions,
   showProgressDetails = false,
   sortOptions = bookSortOptions,
   storageNamespace = 'library',
@@ -92,11 +93,14 @@ function BookCollectionView({
           <h2 id="collection-title">{title}</h2>
           <p>{description}</p>
         </div>
-        {allowCreate ? (
-          <button className="button button-primary" type="button" onClick={openCreateForm}>
-            {addButtonLabel}
-          </button>
-        ) : null}
+        <div className="form-actions">
+          {renderHeaderActions?.({ setFeedback })}
+          {allowCreate ? (
+            <button className="button button-primary" type="button" onClick={openCreateForm}>
+              {addButtonLabel}
+            </button>
+          ) : null}
+        </div>
       </div>
 
       <FeedbackMessage message={feedback} onDismiss={dismissFeedback} />

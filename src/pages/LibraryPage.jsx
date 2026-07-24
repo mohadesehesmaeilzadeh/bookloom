@@ -1,4 +1,5 @@
 import BookCollectionView from '../components/books/BookCollectionView'
+import RecommendationButton from '../components/recommendations/RecommendationButton'
 import { BOOK_SORT, getBookSortOptions } from '../constants/bookSortOptions'
 import { useBooksContext } from '../context/useBooksContext'
 import { getLibraryBooks } from '../utils/bookSelectors'
@@ -18,6 +19,9 @@ function LibraryPage() {
       emptyTitle="هنوز کتابی در کتابخانه ثبت نشده است."
       initialSort={BOOK_SORT.NEWEST}
       noResultsDescription="جست‌وجو، دسته‌بندی، وضعیت یا اولویت را تغییر بده."
+      renderHeaderActions={({ setFeedback }) => (
+        <RecommendationButton onFeedback={setFeedback} />
+      )}
       sortOptions={getBookSortOptions([
         BOOK_SORT.NEWEST,
         BOOK_SORT.OLDEST,
