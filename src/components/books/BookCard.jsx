@@ -1,11 +1,14 @@
+import { Link } from 'react-router-dom'
 import { getBookPriorityLabel } from '../../constants/bookPriorities'
 import { getBookStatusLabel } from '../../constants/bookStatuses'
+import { getBookDetailsPath } from '../../constants/routes'
+import BookStatusActions from './BookStatusActions'
 
 function formatNumber(value) {
   return Number(value).toLocaleString('fa-IR')
 }
 
-function BookCard({ book, onDelete, onEdit, onView }) {
+function BookCard({ book, onDelete, onEdit, onStatusChange }) {
   const details = [
     book.author ? `نویسنده: ${book.author}` : '',
     book.category ? `دسته‌بندی: ${book.category}` : '',
@@ -34,9 +37,9 @@ function BookCard({ book, onDelete, onEdit, onView }) {
       ) : null}
 
       <div className="book-card-actions">
-        <button className="button button-ghost" type="button" onClick={() => onView(book)}>
+        <Link className="button button-ghost" to={getBookDetailsPath(book.id)}>
           مشاهده
-        </button>
+        </Link>
         <button className="button button-secondary" type="button" onClick={() => onEdit(book)}>
           ویرایش
         </button>
@@ -44,6 +47,8 @@ function BookCard({ book, onDelete, onEdit, onView }) {
           حذف
         </button>
       </div>
+
+      <BookStatusActions book={book} compact onComplete={onStatusChange} />
     </article>
   )
 }

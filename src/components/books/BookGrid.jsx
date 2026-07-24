@@ -1,6 +1,6 @@
 import BookCard from './BookCard'
 
-function BookGrid({ books, onDelete, onEdit, onView }) {
+function BookGrid({ books, onDelete, onEdit, onStatusChange }) {
   if (books.length === 0) {
     return null
   }
@@ -13,7 +13,7 @@ function BookGrid({ books, onDelete, onEdit, onView }) {
           key={book.id}
           onDelete={onDelete}
           onEdit={onEdit}
-          onView={onView}
+          onStatusChange={onStatusChange}
         />
       ))}
     </div>

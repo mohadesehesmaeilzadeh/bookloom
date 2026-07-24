@@ -1,37 +1,39 @@
+import { ROUTES } from './routes'
+
 export const navigationItems = [
   {
     id: 'dashboard',
     label: 'داشبورد',
-    path: '/',
+    path: ROUTES.DASHBOARD,
   },
   {
     id: 'library',
     label: 'کتابخانه من',
-    path: '/library',
+    path: ROUTES.LIBRARY,
   },
   {
     id: 'reading',
     label: 'در حال مطالعه',
-    path: '/reading',
+    path: ROUTES.READING,
   },
   {
     id: 'wishlist',
     label: 'لیست خرید',
-    path: '/wishlist',
+    path: ROUTES.WISHLIST,
   },
   {
     id: 'finished',
     label: 'تمام‌شده‌ها',
-    path: '/finished',
+    path: ROUTES.FINISHED,
   },
   {
     id: 'statistics',
     label: 'آمار مطالعه',
-    path: '/statistics',
+    path: ROUTES.STATISTICS,
   },
   {
     id: 'settings',
     label: 'تنظیمات',
-    path: '/settings',
+    path: ROUTES.SETTINGS,
   },
 ]

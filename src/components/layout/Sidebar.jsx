@@ -1,8 +1,7 @@
+import { NavLink } from 'react-router-dom'
 import { navigationItems } from '../../constants/navigation'
 
-const enabledNavigationItems = new Set(['dashboard', 'library'])
-
-function Sidebar({ activePage, onNavigate }) {
+function Sidebar() {
   return (
     <aside className="app-sidebar" aria-label="ناوبری اصلی">
       <div className="sidebar-brand">
@@ -16,27 +15,16 @@ function Sidebar({ activePage, onNavigate }) {
       </div>
 
       <nav className="sidebar-nav" aria-label="بخش‌های برنامه">
-        {navigationItems.map((item) => {
-          const isEnabled = enabledNavigationItems.has(item.id)
-          const isActive = item.id === activePage
-
-          return (
-            <button
-              aria-current={isActive ? 'page' : undefined}
-              className={`sidebar-link${isActive ? ' is-active' : ''}`}
-              disabled={!isEnabled}
-              key={item.id}
-              type="button"
-              onClick={() => {
-                if (isEnabled) {
-                  onNavigate(item.id)
-                }
-              }}
-            >
-              {item.label}
-            </button>
-          )
-        })}
+        {navigationItems.map((item) => (
+          <NavLink
+            className={({ isActive }) => `sidebar-link${isActive ? ' is-active' : ''}`}
+            end={item.path === '/'}
+            key={item.id}
+            to={item.path}
+          >
+            {item.label}
+          </NavLink>
+        ))}
       </nav>
     </aside>
   )

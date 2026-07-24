@@ -1,16 +1,15 @@
-const pageHeadings = {
-  dashboard: {
-    eyebrow: 'نمای کلی',
-    title: 'داشبورد',
-  },
-  library: {
-    eyebrow: 'کتاب‌ها',
-    title: 'کتابخانه من',
-  },
-}
+import { matchPath, useLocation } from 'react-router-dom'
+import { routeTitles } from '../../constants/routes'
 
-function Header({ activePage }) {
-  const heading = pageHeadings[activePage] ?? pageHeadings.dashboard
+function Header() {
+  const location = useLocation()
+  const heading =
+    routeTitles.find((route) =>
+      matchPath({ path: route.path, end: route.end ?? true }, location.pathname),
+    ) ?? {
+      eyebrow: 'ناوبری',
+      title: 'صفحه پیدا نشد',
+    }
 
   return (
     <header className="app-header">
