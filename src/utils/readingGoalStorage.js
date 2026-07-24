@@ -1,4 +1,6 @@
-export const READING_GOALS_STORAGE_KEY = 'bookloom_reading_goals'
+import { STORAGE_KEYS } from '../constants/storageKeys'
+
+export const READING_GOALS_STORAGE_KEY = STORAGE_KEYS.readingGoals
 
 function canUseLocalStorage() {
   return typeof window !== 'undefined' && typeof window.localStorage !== 'undefined'
@@ -58,6 +60,19 @@ export function saveReadingGoals(goals) {
       READING_GOALS_STORAGE_KEY,
       JSON.stringify(normalizeReadingGoals(goals)),
     )
+    return true
+  } catch {
+    return false
+  }
+}
+
+export function clearReadingGoals() {
+  if (!canUseLocalStorage()) {
+    return false
+  }
+
+  try {
+    window.localStorage.removeItem(READING_GOALS_STORAGE_KEY)
     return true
   } catch {
     return false

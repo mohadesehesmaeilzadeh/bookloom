@@ -1,6 +1,7 @@
 import { normalizeBooks } from './bookValidation'
+import { STORAGE_KEYS } from '../constants/storageKeys'
 
-export const BOOKS_STORAGE_KEY = 'bookloom_books'
+export const BOOKS_STORAGE_KEY = STORAGE_KEYS.books
 
 function canUseLocalStorage() {
   return typeof window !== 'undefined' && typeof window.localStorage !== 'undefined'

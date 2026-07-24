@@ -21,11 +21,17 @@ function loadInitialBooks() {
 
 export function useBooks() {
   const didInitializeRef = useRef(false)
+  const skipNextSaveRef = useRef(false)
   const [books, setBooks] = useState(loadInitialBooks)
 
   useEffect(() => {
     if (!didInitializeRef.current) {
       didInitializeRef.current = true
+      return
+    }
+
+    if (skipNextSaveRef.current) {
+      skipNextSaveRef.current = false
       return
     }
 
@@ -87,11 +93,29 @@ export function useBooks() {
     [books],
   )
 
+  const replaceBooks = useCallback((nextBooks, options = {}) => {
+    const normalizedBooks = normalizeBooks(nextBooks)
+    const persist = options.persist !== false
+
+    if (persist && !saveBooks(normalizedBooks)) {
+      return { books: normalizedBooks, success: false }
+    }
+
+    if (!persist) {
+      skipNextSaveRef.current = true
+    }
+
+    setBooks(normalizedBooks)
+
+    return { books: normalizedBooks, success: true }
+  }, [])
+
   return {
     books,
     addBook,
     updateBook,
     deleteBook,
     getBookById,
+    replaceBooks,
   }
 }
