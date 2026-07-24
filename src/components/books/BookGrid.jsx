@@ -1,6 +1,13 @@
 import BookCard from './BookCard'
 
-function BookGrid({ books, onDelete, onEdit, onStatusChange }) {
+function BookGrid({
+  books,
+  onDelete,
+  onEdit,
+  onProgressUpdate,
+  onStatusChange,
+  showProgressDetails = false,
+}) {
   if (books.length === 0) {
     return null
   }
@@ -13,6 +20,8 @@ function BookGrid({ books, onDelete, onEdit, onStatusChange }) {
           key={book.id}
           onDelete={onDelete}
           onEdit={onEdit}
+          onProgressUpdate={onProgressUpdate}
+          showProgressDetails={showProgressDetails}
           onStatusChange={onStatusChange}
         />
       ))}

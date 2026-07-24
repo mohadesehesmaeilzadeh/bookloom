@@ -1,6 +1,8 @@
 import { useCallback, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import BookFormModal from '../components/books/BookFormModal'
+import ProgressUpdateController from '../components/books/ProgressUpdateController'
+import ReadingProgressBar from '../components/books/ReadingProgressBar'
 import BookStatusActions from '../components/books/BookStatusActions'
 import ConfirmDialog from '../components/common/ConfirmDialog'
 import FeedbackMessage from '../components/common/FeedbackMessage'
@@ -21,6 +23,7 @@ function BookDetailsPage() {
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
   const [isPurchaseOpen, setIsPurchaseOpen] = useState(false)
+  const [isProgressOpen, setIsProgressOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [feedback, setFeedback] = useState('')
   const dismissFeedback = useCallback(() => setFeedback(''), [])
@@ -86,6 +89,11 @@ function BookDetailsPage() {
   }
 
   const isWishlistBook = book.status === BOOK_STATUS.WISHLIST
+  const canUpdateProgress =
+    book.status === BOOK_STATUS.READING || book.status === BOOK_STATUS.PAUSED
+  const shouldShowProgress =
+    canUpdateProgress ||
+    (book.status === BOOK_STATUS.FINISHED && book.totalPages > 0)
 
   return (
     <section className="book-details-page" aria-labelledby="book-details-title">
@@ -142,6 +150,33 @@ function BookDetailsPage() {
         </div>
       )}
 
+      {shouldShowProgress ? (
+        <div className="details-section">
+          <h3>پیشرفت مطالعه</h3>
+          <ReadingProgressBar
+            currentPage={book.currentPage}
+            showDetails
+            totalPages={book.totalPages}
+          />
+          {book.lastProgressUpdate ? (
+            <p className="progress-updated">
+              آخرین به‌روزرسانی: {formatDateTime(book.lastProgressUpdate)}
+            </p>
+          ) : null}
+          {canUpdateProgress ? (
+            <div className="status-actions">
+              <button
+                className="button button-primary"
+                type="button"
+                onClick={() => setIsProgressOpen(true)}
+              >
+                به‌روزرسانی پیشرفت
+              </button>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
       <div className="details-section book-details">
         <h3>اطلاعات کتاب</h3>
         <dl>
@@ -178,6 +213,14 @@ function BookDetailsPage() {
         title="حذف کتاب"
         onCancel={() => setIsDeleteOpen(false)}
         onConfirm={handleDeleteConfirm}
+      />
+
+      <ProgressUpdateController
+        book={book}
+        isOpen={isProgressOpen}
+        onClose={() => setIsProgressOpen(false)}
+        onFinished={setFeedback}
+        onProgressSaved={setFeedback}
       />
     </section>
   )

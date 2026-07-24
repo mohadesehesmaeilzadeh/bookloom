@@ -16,7 +16,6 @@ const stringFields = [
   'readingEndDate',
   'purchaseStore',
   'notes',
-  'lastProgressUpdate',
 ]
 
 const defaultBookValues = {
@@ -114,6 +113,9 @@ export function normalizeBook(book, options = {}) {
   normalized.rating = clampNumber(normalizeNonNegativeNumber(source.rating), 0, 5)
   normalized.price = normalizeNonNegativeNumber(source.price)
   normalized.expectedPrice = normalizeNonNegativeNumber(source.expectedPrice)
+  normalized.lastProgressUpdate = isValidTimestamp(source.lastProgressUpdate)
+    ? source.lastProgressUpdate
+    : ''
   normalized.createdAt = isValidTimestamp(source.createdAt) ? source.createdAt : now
   normalized.updatedAt =
     options.refreshUpdatedAt || !isValidTimestamp(source.updatedAt)

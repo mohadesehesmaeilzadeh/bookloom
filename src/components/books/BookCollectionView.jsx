@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 import BookFormModal from './BookFormModal'
 import BookGrid from './BookGrid'
+import ProgressUpdateController from './ProgressUpdateController'
 import ConfirmDialog from '../common/ConfirmDialog'
 import FeedbackMessage from '../common/FeedbackMessage'
 import { useBooksContext } from '../../context/useBooksContext'
@@ -13,10 +14,12 @@ function BookCollectionView({
   emptyActionLabel,
   emptyDescription,
   emptyTitle,
+  showProgressDetails = false,
   title,
 }) {
   const { addBook, deleteBook, updateBook } = useBooksContext()
   const [formState, setFormState] = useState({ book: null, mode: null })
+  const [progressBook, setProgressBook] = useState(null)
   const [deleteCandidate, setDeleteCandidate] = useState(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [feedback, setFeedback] = useState('')
@@ -97,6 +100,8 @@ function BookCollectionView({
           books={books}
           onDelete={setDeleteCandidate}
           onEdit={openEditForm}
+          onProgressUpdate={setProgressBook}
+          showProgressDetails={showProgressDetails}
           onStatusChange={setFeedback}
         />
       )}
@@ -121,6 +126,14 @@ function BookCollectionView({
         title="حذف کتاب"
         onCancel={() => setDeleteCandidate(null)}
         onConfirm={handleConfirmDelete}
+      />
+
+      <ProgressUpdateController
+        book={progressBook}
+        isOpen={Boolean(progressBook)}
+        onClose={() => setProgressBook(null)}
+        onFinished={setFeedback}
+        onProgressSaved={setFeedback}
       />
     </section>
   )

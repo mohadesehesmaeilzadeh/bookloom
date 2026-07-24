@@ -2,13 +2,27 @@ import { Link } from 'react-router-dom'
 import { getBookPriorityLabel } from '../../constants/bookPriorities'
 import { getBookStatusLabel } from '../../constants/bookStatuses'
 import { getBookDetailsPath } from '../../constants/routes'
+import { BOOK_STATUS } from '../../constants/bookStatuses'
+import { formatDateTime } from '../../utils/dateUtils'
 import BookStatusActions from './BookStatusActions'
+import ReadingProgressBar from './ReadingProgressBar'
 
 function formatNumber(value) {
   return Number(value).toLocaleString('fa-IR')
 }
 
-function BookCard({ book, onDelete, onEdit, onStatusChange }) {
+function BookCard({
+  book,
+  onDelete,
+  onEdit,
+  onProgressUpdate,
+  onStatusChange,
+  showProgressDetails = false,
+}) {
+  const showProgress =
+    book.status === BOOK_STATUS.READING ||
+    book.status === BOOK_STATUS.PAUSED ||
+    (book.status === BOOK_STATUS.FINISHED && book.totalPages > 0)
   const details = [
     book.author ? `نویسنده: ${book.author}` : '',
     book.category ? `دسته‌بندی: ${book.category}` : '',
@@ -36,6 +50,22 @@ function BookCard({ book, onDelete, onEdit, onStatusChange }) {
         </dl>
       ) : null}
 
+      {showProgress ? (
+        <div className="card-progress">
+          <ReadingProgressBar
+            currentPage={book.currentPage}
+            showDetails={showProgressDetails}
+            size="compact"
+            totalPages={book.totalPages}
+          />
+          {book.lastProgressUpdate ? (
+            <p className="progress-updated">
+              آخرین به‌روزرسانی: {formatDateTime(book.lastProgressUpdate)}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+
       <div className="book-card-actions">
         <Link className="button button-ghost" to={getBookDetailsPath(book.id)}>
           مشاهده
@@ -47,6 +77,18 @@ function BookCard({ book, onDelete, onEdit, onStatusChange }) {
           حذف
         </button>
       </div>
+
+      {book.status === BOOK_STATUS.READING || book.status === BOOK_STATUS.PAUSED ? (
+        <div className="book-card-actions">
+          <button
+            className="button button-primary"
+            type="button"
+            onClick={() => onProgressUpdate?.(book)}
+          >
+            به‌روزرسانی پیشرفت
+          </button>
+        </div>
+      ) : null}
 
       <BookStatusActions book={book} compact onComplete={onStatusChange} />
     </article>

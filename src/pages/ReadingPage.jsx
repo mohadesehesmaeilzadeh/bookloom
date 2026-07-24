@@ -3,14 +3,16 @@ import BookCollectionView from '../components/books/BookCollectionView'
 import { ROUTES } from '../constants/routes'
 import { useBooksContext } from '../context/useBooksContext'
 import { getReadingBooks } from '../utils/bookSelectors'
+import { sortReadingBooksByActivity } from '../utils/readingProgress'
 
 function ReadingPage() {
   const { books } = useBooksContext()
 
   return (
     <BookCollectionView
-      books={getReadingBooks(books)}
+      books={sortReadingBooksByActivity(getReadingBooks(books))}
       description="کتاب‌هایی که اکنون در حال مطالعه هستند یا موقتاً متوقف شده‌اند."
+      showProgressDetails
       emptyDescription={
         <>
           از{' '}
