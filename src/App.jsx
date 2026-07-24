@@ -1,11 +1,14 @@
 import AppLayout from './layouts/AppLayout'
 import DashboardPage from './pages/DashboardPage'
+import { BooksProvider } from './context/BooksProvider'
 
 function App() {
   return (
-    <AppLayout>
-      <DashboardPage />
-    </AppLayout>
+    <BooksProvider>
+      <AppLayout>
+        <DashboardPage />
+      </AppLayout>
+    </BooksProvider>
   )
 }
 
