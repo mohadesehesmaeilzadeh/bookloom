@@ -1,122 +1,199 @@
+import { useCallback, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useCallback, useState } from 'react'
 import ProgressUpdateController from '../components/books/ProgressUpdateController'
-import ReadingProgressBar from '../components/books/ReadingProgressBar'
-import { BOOK_STATUS, getBookStatusLabel } from '../constants/bookStatuses'
-import { getBookDetailsPath, ROUTES } from '../constants/routes'
-import { useBooksContext } from '../context/useBooksContext'
-import { formatDateTime } from '../utils/dateUtils'
-import { getReadingBooks } from '../utils/bookSelectors'
-import { getContinueReadingBook } from '../utils/readingProgress'
 import FeedbackMessage from '../components/common/FeedbackMessage'
-
-function formatCount(value) {
-  return value.toLocaleString('fa-IR')
-}
+import CategorySummary from '../components/dashboard/CategorySummary'
+import ContinueReadingCard from '../components/dashboard/ContinueReadingCard'
+import MonthlyFinishedSummary from '../components/dashboard/MonthlyFinishedSummary'
+import ReadingGoalCard from '../components/dashboard/ReadingGoalCard'
+import ReadingGoalModal from '../components/dashboard/ReadingGoalModal'
+import ReadingPagesSummary from '../components/dashboard/ReadingPagesSummary'
+import RecentActivityList from '../components/dashboard/RecentActivityList'
+import RecentBooksList from '../components/dashboard/RecentBooksList'
+import StatisticCard from '../components/dashboard/StatisticCard'
+import { ROUTES } from '../constants/routes'
+import { useBooksContext } from '../context/useBooksContext'
+import { useReadingGoal } from '../hooks/useReadingGoal'
+import {
+  getAnnualGoalProgress,
+  getBooksFinishedByMonth,
+  getCategoryStatistics,
+  getContinueReadingBook,
+  getDashboardSummary,
+  getReadingPagesSummary,
+  getRecentActivity,
+  getRecentBooks,
+  getRecentFinishedBooks,
+} from '../utils/dashboardStatistics'
 
 function DashboardPage() {
   const { books } = useBooksContext()
+  const currentYear = new Date().getFullYear()
+  const { annualGoal, hasAnnualGoal, saveAnnualGoal, year } = useReadingGoal(currentYear)
   const [progressBook, setProgressBook] = useState(null)
+  const [isGoalModalOpen, setIsGoalModalOpen] = useState(false)
   const [feedback, setFeedback] = useState('')
   const dismissFeedback = useCallback(() => setFeedback(''), [])
-  const continueReadingBook = getContinueReadingBook(getReadingBooks(books))
-  const dashboardCards = [
+  const dashboardData = useMemo(
+    () => ({
+      categoryStatistics: getCategoryStatistics(books),
+      continueReadingBook: getContinueReadingBook(books),
+      monthlyFinished: getBooksFinishedByMonth(books, currentYear),
+      pagesSummary: getReadingPagesSummary(books),
+      recentActivity: getRecentActivity(books),
+      recentBooks: getRecentBooks(books),
+      recentFinishedBooks: getRecentFinishedBooks(books),
+      summary: getDashboardSummary(books),
+    }),
+    [books, currentYear],
+  )
+  const annualGoalProgress = useMemo(
+    () => getAnnualGoalProgress(books, annualGoal, year),
+    [annualGoal, books, year],
+  )
+  const hasBooks = books.length > 0
+  const summaryCards = [
     {
-      label: 'کل کتاب‌ها',
-      value: books.length,
+      description: 'همه رکوردها، شامل کتابخانه و لیست خرید',
+      link: ROUTES.LIBRARY,
+      title: 'کل کتاب‌ها',
+      value: dashboardData.summary.totalBooks,
     },
     {
-      label: getBookStatusLabel(BOOK_STATUS.READING),
-      value: books.filter((book) => book.status === BOOK_STATUS.READING).length,
+      description: 'کتاب‌های متعلق به کتابخانه، بدون لیست خرید',
+      link: ROUTES.LIBRARY,
+      title: 'کتاب‌های کتابخانه',
+      value: dashboardData.summary.libraryBooks,
     },
     {
-      label: `${getBookStatusLabel(BOOK_STATUS.FINISHED)}‌ها`,
-      value: books.filter((book) => book.status === BOOK_STATUS.FINISHED).length,
+      description:
+        dashboardData.summary.pausedBooks > 0
+          ? `${dashboardData.summary.pausedBooks.toLocaleString('fa-IR')} کتاب متوقف‌شده`
+          : 'کتاب‌هایی که اکنون در حال خواندن هستند',
+      link: ROUTES.READING,
+      title: 'در حال مطالعه',
+      value: dashboardData.summary.readingBooks,
     },
     {
-      label: getBookStatusLabel(BOOK_STATUS.WISHLIST),
-      value: books.filter((book) => book.status === BOOK_STATUS.WISHLIST).length,
+      description: 'کتاب‌هایی که تاریخ پایان مطالعه دارند در آمار سالانه هم بررسی می‌شوند',
+      link: ROUTES.FINISHED,
+      title: 'تمام‌شده‌ها',
+      value: dashboardData.summary.finishedBooks,
+    },
+    {
+      description: 'کتاب‌هایی که هنوز خریداری نشده‌اند',
+      link: ROUTES.WISHLIST,
+      title: 'لیست خرید',
+      value: dashboardData.summary.wishlistBooks,
+    },
+    {
+      description: 'برآوردی از صفحات خوانده‌شده بر اساس وضعیت فعلی کتاب‌ها',
+      title: 'مجموع صفحات خوانده‌شده',
+      value: dashboardData.summary.totalReadPages,
     },
   ]
+
+  function handleGoalSubmit(goal) {
+    saveAnnualGoal(goal)
+    setIsGoalModalOpen(false)
+    setFeedback('هدف مطالعه سالانه ذخیره شد.')
+  }
 
   return (
     <section className="dashboard-page" aria-labelledby="dashboard-title">
       <div className="dashboard-intro">
-        <h2 id="dashboard-title">به بوک‌لوم خوش آمدید</h2>
+        <h2 id="dashboard-title">داشبورد Bookloom</h2>
         <p>
-          اینجا نقطه شروع مدیریت کتاب‌های شخصی شماست. در فازهای بعدی، بخش‌های
-          کتابخانه، مطالعه، خرید و آمار به‌تدریج اضافه می‌شوند.
+          نمایی فشرده از کتابخانه، پیشرفت مطالعه، هدف سالانه و فعالیت‌های اخیر بر اساس داده‌های
+          ذخیره‌شده فعلی.
         </p>
       </div>
 
+      {!hasBooks ? (
+        <div className="empty-state dashboard-onboarding">
+          <h3>هنوز کتابی در Bookloom ثبت نکرده‌ای.</h3>
+          <p>اولین کتابت را به کتابخانه یا لیست خرید اضافه کن.</p>
+          <div className="form-actions">
+            <Link className="button button-primary" to={ROUTES.LIBRARY}>
+              رفتن به کتابخانه
+            </Link>
+            <Link className="button button-secondary" to={ROUTES.WISHLIST}>
+              رفتن به لیست خرید
+            </Link>
+          </div>
+        </div>
+      ) : null}
+
       <div className="dashboard-grid" aria-label="خلاصه وضعیت کتاب‌ها">
-        {dashboardCards.map((card) => (
-          <article className="summary-card" key={card.label}>
-            <span>{card.label}</span>
-            <strong>{formatCount(card.value)}</strong>
-          </article>
+        {summaryCards.map((card) => (
+          <StatisticCard
+            description={card.description}
+            key={card.title}
+            link={card.link}
+            title={card.title}
+            value={card.value}
+          />
         ))}
       </div>
 
       <FeedbackMessage message={feedback} onDismiss={dismissFeedback} />
 
-      <section className="continue-reading-section" aria-labelledby="continue-reading-title">
+      <section className="dashboard-section" aria-labelledby="continue-reading-title">
         <div className="library-header">
           <div>
             <h2 id="continue-reading-title">ادامه مطالعه</h2>
-            <p>آخرین کتابی که برای ادامه مطالعه مناسب است.</p>
+            <p>مناسب‌ترین کتاب برای ادامه بر اساس وضعیت و آخرین فعالیت مطالعه انتخاب می‌شود.</p>
           </div>
         </div>
-
-        {continueReadingBook ? (
-          <article className="continue-reading-card">
-            <div>
-              <h3>{continueReadingBook.title}</h3>
-              {continueReadingBook.author ? <p>{continueReadingBook.author}</p> : null}
-              {continueReadingBook.status === BOOK_STATUS.PAUSED ? (
-                <span className="book-priority">متوقف‌شده</span>
-              ) : null}
-            </div>
-            <ReadingProgressBar
-              currentPage={continueReadingBook.currentPage}
-              showDetails
-              totalPages={continueReadingBook.totalPages}
-            />
-            {continueReadingBook.lastProgressUpdate ? (
-              <p className="progress-updated">
-                آخرین به‌روزرسانی:{' '}
-                {formatDateTime(continueReadingBook.lastProgressUpdate)}
-              </p>
-            ) : null}
-            <div className="form-actions">
-              <Link
-                className="button button-secondary"
-                to={getBookDetailsPath(continueReadingBook.id)}
-              >
-                مشاهده جزئیات
-              </Link>
-              <button
-                className="button button-primary"
-                type="button"
-                onClick={() => setProgressBook(continueReadingBook)}
-              >
-                به‌روزرسانی پیشرفت
-              </button>
-            </div>
-          </article>
-        ) : (
-          <div className="empty-state">
-            <h3>در حال حاضر کتابی را مطالعه نمی‌کنی.</h3>
-            <p>
-              از{' '}
-              <Link className="inline-link" to={ROUTES.LIBRARY}>
-                کتابخانه
-              </Link>{' '}
-              یک کتاب را برای شروع انتخاب کن.
-            </p>
-          </div>
-        )}
+        <ContinueReadingCard
+          book={dashboardData.continueReadingBook}
+          onUpdateProgress={setProgressBook}
+        />
       </section>
+
+      <section className="dashboard-section" aria-labelledby="annual-goal-title">
+        <div className="library-header">
+          <div>
+            <h2 id="annual-goal-title">هدف مطالعه سالانه</h2>
+            <p>فقط کتاب‌های تمام‌شده با تاریخ پایان معتبر در سال جاری شمرده می‌شوند.</p>
+          </div>
+        </div>
+        <ReadingGoalCard
+          hasGoal={hasAnnualGoal}
+          progress={annualGoalProgress}
+          onEdit={() => setIsGoalModalOpen(true)}
+        />
+      </section>
+
+      <ReadingPagesSummary summary={dashboardData.pagesSummary} />
+      <MonthlyFinishedSummary months={dashboardData.monthlyFinished} />
+      <RecentActivityList activities={dashboardData.recentActivity} />
+
+      <div className="dashboard-two-column">
+        <RecentBooksList
+          books={dashboardData.recentBooks}
+          dateField="createdAt"
+          emptyMessage="هنوز کتابی اضافه نشده است."
+          title="کتاب‌های تازه اضافه‌شده"
+        />
+        <RecentBooksList
+          books={dashboardData.recentFinishedBooks}
+          dateField="readingEndDate"
+          emptyMessage="هنوز کتاب تمام‌شده‌ای با تاریخ پایان معتبر ثبت نشده است."
+          showPages
+          title="کتاب‌های تازه تمام‌شده"
+        />
+      </div>
+
+      <CategorySummary statistics={dashboardData.categoryStatistics} />
+
+      <ReadingGoalModal
+        goal={annualGoal}
+        isOpen={isGoalModalOpen}
+        year={year}
+        onClose={() => setIsGoalModalOpen(false)}
+        onSubmit={handleGoalSubmit}
+      />
 
       <ProgressUpdateController
         book={progressBook}
