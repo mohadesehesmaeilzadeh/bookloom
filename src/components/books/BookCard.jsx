@@ -5,6 +5,7 @@ import { getBookDetailsPath } from '../../constants/routes'
 import { BOOK_STATUS } from '../../constants/bookStatuses'
 import { formatDateTime } from '../../utils/dateUtils'
 import BookStatusActions from './BookStatusActions'
+import BookRating from './BookRating'
 import ReadingProgressBar from './ReadingProgressBar'
 
 function formatNumber(value) {
@@ -62,6 +63,18 @@ function BookCard({
             <p className="progress-updated">
               آخرین به‌روزرسانی: {formatDateTime(book.lastProgressUpdate)}
             </p>
+          ) : null}
+        </div>
+      ) : null}
+
+      {book.rating > 0 || (book.status === BOOK_STATUS.FINISHED && (book.personalReview || book.quotes?.length > 0)) ? (
+        <div className="card-insights">
+          {book.rating > 0 ? <BookRating rating={book.rating} readOnly /> : null}
+          {book.status === BOOK_STATUS.FINISHED && book.personalReview ? (
+            <p>{book.personalReview}</p>
+          ) : null}
+          {book.status === BOOK_STATUS.FINISHED && book.quotes?.length > 0 ? (
+            <span>{formatNumber(book.quotes.length)} نقل‌قول</span>
           ) : null}
         </div>
       ) : null}

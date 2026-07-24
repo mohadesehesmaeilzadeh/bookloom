@@ -4,6 +4,7 @@ import ProgressUpdateController from '../components/books/ProgressUpdateControll
 import FeedbackMessage from '../components/common/FeedbackMessage'
 import CategorySummary from '../components/dashboard/CategorySummary'
 import ContinueReadingCard from '../components/dashboard/ContinueReadingCard'
+import DailyQuoteCard from '../components/dashboard/DailyQuoteCard'
 import MonthlyFinishedSummary from '../components/dashboard/MonthlyFinishedSummary'
 import ReadingGoalCard from '../components/dashboard/ReadingGoalCard'
 import ReadingGoalModal from '../components/dashboard/ReadingGoalModal'
@@ -25,6 +26,7 @@ import {
   getRecentBooks,
   getRecentFinishedBooks,
 } from '../utils/dashboardStatistics'
+import { getDailyBookQuote } from '../utils/bookQuotes'
 
 function DashboardPage() {
   const { books } = useBooksContext()
@@ -43,6 +45,7 @@ function DashboardPage() {
       recentActivity: getRecentActivity(books),
       recentBooks: getRecentBooks(books),
       recentFinishedBooks: getRecentFinishedBooks(books),
+      dailyQuote: getDailyBookQuote(books),
       summary: getDashboardSummary(books),
     }),
     [books, currentYear],
@@ -166,6 +169,7 @@ function DashboardPage() {
       </section>
 
       <ReadingPagesSummary summary={dashboardData.pagesSummary} />
+      <DailyQuoteCard quoteItem={dashboardData.dailyQuote} />
       <MonthlyFinishedSummary months={dashboardData.monthlyFinished} />
       <RecentActivityList activities={dashboardData.recentActivity} />
 

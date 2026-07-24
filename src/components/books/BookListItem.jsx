@@ -4,6 +4,7 @@ import { BOOK_STATUS, getBookStatusLabel } from '../../constants/bookStatuses'
 import { getBookDetailsPath } from '../../constants/routes'
 import { formatPrice } from '../../utils/formatPrice'
 import BookStatusActions from './BookStatusActions'
+import BookRating from './BookRating'
 import ReadingProgressBar from './ReadingProgressBar'
 
 function BookListItem({
@@ -29,6 +30,10 @@ function BookListItem({
             .join(' · ')}
         </p>
         <span>{getBookPriorityLabel(book.priority)}</span>
+        {book.rating > 0 ? <BookRating rating={book.rating} readOnly /> : null}
+        {book.status === BOOK_STATUS.FINISHED && book.quotes?.length > 0 ? (
+          <span>{book.quotes.length.toLocaleString('fa-IR')} نقل‌قول</span>
+        ) : null}
       </div>
 
       {showProgress ? (

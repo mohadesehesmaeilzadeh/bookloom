@@ -1,19 +1,43 @@
 import { useCallback, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import BookFormModal from '../components/books/BookFormModal'
+import BookNotesSection from '../components/books/BookNotesSection'
+import BookReviewSection from '../components/books/BookReviewSection'
 import ProgressUpdateController from '../components/books/ProgressUpdateController'
 import ReadingProgressBar from '../components/books/ReadingProgressBar'
 import BookStatusActions from '../components/books/BookStatusActions'
 import ConfirmDialog from '../components/common/ConfirmDialog'
 import FeedbackMessage from '../components/common/FeedbackMessage'
+import BookQuotesSection from '../components/quotes/BookQuotesSection'
 import PurchaseBookModal from '../components/wishlist/PurchaseBookModal'
 import { getBookPriorityLabel } from '../constants/bookPriorities'
 import { BOOK_STATUS, getBookStatusLabel } from '../constants/bookStatuses'
 import { ROUTES } from '../constants/routes'
 import { useBooksContext } from '../context/useBooksContext'
+import { formatDate, formatDateTime } from '../utils/dateUtils'
+import { formatNumber } from '../utils/formatNumber'
 import { formatPrice } from '../utils/formatPrice'
-import { formatDateTime } from '../utils/dateUtils'
+import { calculateReadingProgress } from '../utils/readingProgress'
 import { createPurchaseConversionPayload } from '../utils/wishlist/purchaseConversion'
+
+function DetailsList({ rows }) {
+  const visibleRows = rows.filter(([, value]) => value !== '' && value !== null && value !== undefined)
+
+  if (visibleRows.length === 0) {
+    return <p className="muted-note">اطلاعاتی برای نمایش وجود ندارد.</p>
+  }
+
+  return (
+    <dl>
+      {visibleRows.map(([label, value]) => (
+        <div key={label}>
+          <dt>{label}</dt>
+          <dd>{value}</dd>
+        </div>
+      ))}
+    </dl>
+  )
+}
 
 function BookDetailsPage() {
   const { bookId } = useParams()
@@ -40,7 +64,14 @@ function BookDetailsPage() {
     )
   }
 
-  const rows = [
+  const isWishlistBook = book.status === BOOK_STATUS.WISHLIST
+  const canUpdateProgress =
+    book.status === BOOK_STATUS.READING || book.status === BOOK_STATUS.PAUSED
+  const shouldShowProgress =
+    canUpdateProgress ||
+    (book.status === BOOK_STATUS.FINISHED && book.totalPages > 0)
+  const progress = calculateReadingProgress(book.currentPage, book.totalPages)
+  const basicRows = [
     ['نام کتاب', book.title],
     ['نویسنده', book.author],
     ['مترجم', book.translator],
@@ -48,17 +79,25 @@ function BookDetailsPage() {
     ['دسته‌بندی', book.category],
     ['وضعیت', getBookStatusLabel(book.status)],
     ['اولویت', getBookPriorityLabel(book.priority)],
-    ['تاریخ خرید', book.purchaseDate],
-    ['تاریخ شروع مطالعه', book.readingStartDate],
-    ['تاریخ پایان مطالعه', book.readingEndDate],
-    ['تعداد صفحات', book.totalPages > 0 ? book.totalPages.toLocaleString('fa-IR') : ''],
-    ['قیمت خرید', formatPrice(book.price)],
+    ['تعداد صفحات', book.totalPages > 0 ? formatNumber(book.totalPages) : ''],
+  ]
+  const purchaseRows = [
     ['قیمت تقریبی', formatPrice(book.expectedPrice)],
+    ['قیمت خرید', formatPrice(book.price)],
     ['فروشگاه', book.purchaseStore],
-    ['یادداشت', book.notes],
-    ['تاریخ ثبت', formatDateTime(book.createdAt)],
-    ['آخرین ویرایش', formatDateTime(book.updatedAt)],
-  ].filter(([, value]) => value !== '')
+    ['تاریخ خرید', formatDate(book.purchaseDate)],
+  ]
+  const readingRows = [
+    ['تاریخ شروع مطالعه', formatDate(book.readingStartDate)],
+    ['تاریخ پایان مطالعه', formatDate(book.readingEndDate)],
+    ['صفحه فعلی', book.currentPage > 0 ? formatNumber(book.currentPage) : ''],
+    ['پیشرفت مطالعه', book.totalPages > 0 ? `${formatNumber(progress)}٪` : ''],
+    ['آخرین به‌روزرسانی پیشرفت', formatDateTime(book.lastProgressUpdate)],
+  ]
+  const metadataRows = [
+    ['تاریخ ایجاد', formatDateTime(book.createdAt)],
+    ['آخرین تغییر', formatDateTime(book.updatedAt)],
+  ]
 
   function handleEditSubmit(payload) {
     const result = updateBook(book.id, payload)
@@ -88,19 +127,36 @@ function BookDetailsPage() {
     }
   }
 
-  const isWishlistBook = book.status === BOOK_STATUS.WISHLIST
-  const canUpdateProgress =
-    book.status === BOOK_STATUS.READING || book.status === BOOK_STATUS.PAUSED
-  const shouldShowProgress =
-    canUpdateProgress ||
-    (book.status === BOOK_STATUS.FINISHED && book.totalPages > 0)
+  function handleNotesSave(notes) {
+    const result = updateBook(book.id, { notes })
+
+    if (result.success) {
+      setFeedback('یادداشت‌های کتاب ذخیره شد.')
+    }
+  }
+
+  function handleReviewSave(personalReview) {
+    const result = updateBook(book.id, { personalReview })
+
+    if (result.success) {
+      setFeedback('نظر شخصی ذخیره شد.')
+    }
+  }
+
+  function handleRatingChange(rating) {
+    const result = updateBook(book.id, { rating })
+
+    if (result.success) {
+      setFeedback(rating > 0 ? 'امتیاز کتاب ذخیره شد.' : 'امتیاز کتاب حذف شد.')
+    }
+  }
 
   return (
     <section className="book-details-page" aria-labelledby="book-details-title">
       <div className="library-header">
         <div>
           <h2 id="book-details-title">{book.title}</h2>
-          <p>اطلاعات پایه کتاب و وضعیت مطالعه را از اینجا مدیریت کنید.</p>
+          <p>جزئیات کتاب، وضعیت مطالعه، یادداشت‌ها، نظر شخصی و نقل‌قول‌ها را از اینجا مدیریت کن.</p>
         </div>
         <div className="form-actions">
           <Link className="button button-secondary" to={ROUTES.LIBRARY}>
@@ -126,12 +182,38 @@ function BookDetailsPage() {
 
       <FeedbackMessage message={feedback} onDismiss={dismissFeedback} />
 
+      <div className="details-section book-details">
+        <h3>اطلاعات اصلی</h3>
+        <DetailsList rows={basicRows} />
+      </div>
+
+      {shouldShowProgress ? (
+        <div className="details-section">
+          <h3>پیشرفت مطالعه</h3>
+          <ReadingProgressBar
+            currentPage={book.currentPage}
+            showDetails
+            totalPages={book.totalPages}
+          />
+          {canUpdateProgress ? (
+            <div className="status-actions">
+              <button
+                className="button button-primary"
+                type="button"
+                onClick={() => setIsProgressOpen(true)}
+              >
+                به‌روزرسانی پیشرفت
+              </button>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
       {isWishlistBook ? (
         <div className="details-section">
           <h3>خرید کتاب</h3>
           <p className="muted-note">
-            این کتاب هنوز در لیست خرید است. برای انتقال همان رکورد به کتابخانه،
-            خرید را ثبت کن.
+            این کتاب هنوز در لیست خرید است. برای انتقال همان رکورد به کتابخانه، خرید را ثبت کن.
           </p>
           <div className="status-actions">
             <button
@@ -150,43 +232,33 @@ function BookDetailsPage() {
         </div>
       )}
 
-      {shouldShowProgress ? (
-        <div className="details-section">
-          <h3>پیشرفت مطالعه</h3>
-          <ReadingProgressBar
-            currentPage={book.currentPage}
-            showDetails
-            totalPages={book.totalPages}
-          />
-          {book.lastProgressUpdate ? (
-            <p className="progress-updated">
-              آخرین به‌روزرسانی: {formatDateTime(book.lastProgressUpdate)}
-            </p>
-          ) : null}
-          {canUpdateProgress ? (
-            <div className="status-actions">
-              <button
-                className="button button-primary"
-                type="button"
-                onClick={() => setIsProgressOpen(true)}
-              >
-                به‌روزرسانی پیشرفت
-              </button>
-            </div>
-          ) : null}
+      <div className="details-two-column">
+        <div className="details-section book-details">
+          <h3>اطلاعات خرید</h3>
+          <DetailsList rows={purchaseRows} />
         </div>
+        <div className="details-section book-details">
+          <h3>تاریخ‌ها و مطالعه</h3>
+          <DetailsList rows={readingRows} />
+        </div>
+      </div>
+
+      <BookNotesSection notes={book.notes} onSave={handleNotesSave} />
+
+      {!isWishlistBook ? (
+        <BookReviewSection
+          personalReview={book.personalReview}
+          rating={book.rating}
+          onRatingChange={handleRatingChange}
+          onReviewSave={handleReviewSave}
+        />
       ) : null}
 
+      <BookQuotesSection book={book} onFeedback={setFeedback} onUpdateBook={updateBook} />
+
       <div className="details-section book-details">
-        <h3>اطلاعات کتاب</h3>
-        <dl>
-          {rows.map(([label, value]) => (
-            <div key={label}>
-              <dt>{label}</dt>
-              <dd>{value}</dd>
-            </div>
-          ))}
-        </dl>
+        <h3>فراداده</h3>
+        <DetailsList rows={metadataRows} />
       </div>
 
       <BookFormModal

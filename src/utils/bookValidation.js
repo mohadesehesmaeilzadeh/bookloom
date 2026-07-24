@@ -4,6 +4,7 @@ import {
 } from '../constants/bookPriorities'
 import { DEFAULT_BOOK_STATUS, bookStatusValues } from '../constants/bookStatuses'
 import { generateId } from './generateId'
+import { normalizeQuotes } from './quoteValidation'
 
 const stringFields = [
   'title',
@@ -16,6 +17,7 @@ const stringFields = [
   'readingEndDate',
   'purchaseStore',
   'notes',
+  'personalReview',
 ]
 
 const defaultBookValues = {
@@ -36,6 +38,8 @@ const defaultBookValues = {
   expectedPrice: 0,
   purchaseStore: '',
   notes: '',
+  personalReview: '',
+  quotes: [],
   lastProgressUpdate: '',
 }
 
@@ -89,6 +93,7 @@ export function normalizeBook(book, options = {}) {
   const source = isRecord(book) ? book : {}
   const now = options.now ?? new Date().toISOString()
   const normalized = {
+    ...source,
     id: normalizeId(source.id),
     ...defaultBookValues,
   }
@@ -113,6 +118,7 @@ export function normalizeBook(book, options = {}) {
   normalized.rating = clampNumber(normalizeNonNegativeNumber(source.rating), 0, 5)
   normalized.price = normalizeNonNegativeNumber(source.price)
   normalized.expectedPrice = normalizeNonNegativeNumber(source.expectedPrice)
+  normalized.quotes = normalizeQuotes(source.quotes, { now })
   normalized.lastProgressUpdate = isValidTimestamp(source.lastProgressUpdate)
     ? source.lastProgressUpdate
     : ''

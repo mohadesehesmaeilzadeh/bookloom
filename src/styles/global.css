@@ -1009,6 +1009,13 @@ a {
   gap: var(--space-5);
 }
 
+.details-two-column {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-5);
+  align-items: start;
+}
+
 .details-section {
   display: grid;
   gap: var(--space-4);
@@ -1063,6 +1070,171 @@ a {
   margin: 0;
   overflow-wrap: anywhere;
   color: var(--color-text);
+}
+
+.editable-text-section textarea,
+.quote-form textarea {
+  min-height: 148px;
+}
+
+.preserved-text {
+  margin: 0;
+  color: var(--color-text);
+  line-height: 2;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.soft-empty-state {
+  padding: var(--space-4);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  background: var(--color-surface-soft);
+  line-height: 1.9;
+}
+
+.review-rating-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.book-rating {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.book-rating p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.rating-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.rating-star {
+  min-width: 30px;
+  min-height: 30px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  background: transparent;
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+button.rating-star {
+  cursor: pointer;
+}
+
+.rating-star.active {
+  color: var(--color-focus);
+}
+
+.card-insights {
+  display: grid;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border);
+}
+
+.card-insights .book-rating {
+  gap: var(--space-2);
+}
+
+.card-insights .rating-star {
+  min-width: 22px;
+  min-height: 22px;
+  font-size: 1rem;
+}
+
+.card-insights p {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+  line-height: 1.8;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.card-insights span {
+  color: var(--color-text-muted);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.quote-list {
+  display: grid;
+  gap: var(--space-4);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.quote-card {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+}
+
+.quote-card blockquote,
+.daily-quote-card blockquote {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 1rem;
+  line-height: 2.05;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.quote-meta,
+.quote-note p,
+.daily-quote-card p,
+.daily-quote-card span {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+
+.quote-note {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+}
+
+.quote-note strong {
+  color: var(--color-text);
+  font-size: 0.9rem;
+}
+
+.daily-quote-card {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.daily-quote-card blockquote {
+  font-size: 1.08rem;
 }
 
 .confirm-dialog {
@@ -1180,7 +1352,8 @@ a {
   .book-details dl div,
   .dashboard-inline-metrics,
   .dashboard-metric-grid,
-  .dashboard-two-column {
+  .dashboard-two-column,
+  .details-two-column {
     grid-template-columns: 1fr;
   }
 
