@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { bookPriorities } from '../../constants/bookPriorities'
-import { bookStatuses } from '../../constants/bookStatuses'
+import { BOOK_STATUS, bookStatuses } from '../../constants/bookStatuses'
 import {
   createBookFormPayload,
   getInitialBookFormValues,
@@ -24,7 +24,8 @@ const fieldLabels = {
   notes: 'یادداشت',
 }
 
-function BookForm({ book, onCancel, onSubmit, submitLabel }) {
+function BookForm({ book, onCancel, onSubmit, submitLabel, variant = 'default' }) {
+  const isWishlistVariant = variant === 'wishlist'
   const [values, setValues] = useState(() => getInitialBookFormValues(book))
   const [errors, setErrors] = useState({})
   const [wasSubmitted, setWasSubmitted] = useState(false)
@@ -71,7 +72,15 @@ function BookForm({ book, onCancel, onSubmit, submitLabel }) {
       return
     }
 
-    onSubmit(createBookFormPayload(values))
+    const payload = createBookFormPayload(values)
+
+    if (isWishlistVariant) {
+      payload.status = BOOK_STATUS.WISHLIST
+      payload.purchaseDate = book?.purchaseDate ?? ''
+      payload.price = book?.price ?? 0
+    }
+
+    onSubmit(payload)
   }
 
   return (
@@ -99,22 +108,24 @@ function BookForm({ book, onCancel, onSubmit, submitLabel }) {
         <TextField field="publisher" value={values.publisher} onChange={updateField} />
         <TextField field="category" value={values.category} onChange={updateField} />
 
-        <label className="form-field">
-          <span>{fieldLabels.status}</span>
-          <select
-            aria-describedby={errors.status ? 'status-error' : undefined}
-            aria-invalid={errors.status ? 'true' : 'false'}
-            value={values.status}
-            onChange={(event) => updateField('status', event.target.value)}
-          >
-            {bookStatuses.map((status) => (
-              <option key={status.value} value={status.value}>
-                {status.label}
-              </option>
-            ))}
-          </select>
-          {renderError('status')}
-        </label>
+        {isWishlistVariant ? null : (
+          <label className="form-field">
+            <span>{fieldLabels.status}</span>
+            <select
+              aria-describedby={errors.status ? 'status-error' : undefined}
+              aria-invalid={errors.status ? 'true' : 'false'}
+              value={values.status}
+              onChange={(event) => updateField('status', event.target.value)}
+            >
+              {bookStatuses.map((status) => (
+                <option key={status.value} value={status.value}>
+                  {status.label}
+                </option>
+              ))}
+            </select>
+            {renderError('status')}
+          </label>
+        )}
 
         <label className="form-field">
           <span>{fieldLabels.priority}</span>
@@ -133,28 +144,32 @@ function BookForm({ book, onCancel, onSubmit, submitLabel }) {
           {renderError('priority')}
         </label>
 
-        <label className="form-field">
-          <span>{fieldLabels.purchaseDate}</span>
-          <input
-            type="date"
-            value={values.purchaseDate}
-            onChange={(event) => updateField('purchaseDate', event.target.value)}
-          />
-        </label>
+        {isWishlistVariant ? null : (
+          <>
+            <label className="form-field">
+              <span>{fieldLabels.purchaseDate}</span>
+              <input
+                type="date"
+                value={values.purchaseDate}
+                onChange={(event) => updateField('purchaseDate', event.target.value)}
+              />
+            </label>
 
-        <NumberField
-          error={errors.totalPages}
-          field="totalPages"
-          step="1"
-          value={values.totalPages}
-          onChange={updateField}
-        />
-        <NumberField
-          error={errors.price}
-          field="price"
-          value={values.price}
-          onChange={updateField}
-        />
+            <NumberField
+              error={errors.totalPages}
+              field="totalPages"
+              step="1"
+              value={values.totalPages}
+              onChange={updateField}
+            />
+            <NumberField
+              error={errors.price}
+              field="price"
+              value={values.price}
+              onChange={updateField}
+            />
+          </>
+        )}
         <NumberField
           error={errors.expectedPrice}
           field="expectedPrice"
@@ -163,6 +178,7 @@ function BookForm({ book, onCancel, onSubmit, submitLabel }) {
         />
         <TextField
           field="purchaseStore"
+          label={isWishlistVariant ? 'فروشگاه پیشنهادی' : fieldLabels.purchaseStore}
           value={values.purchaseStore}
           onChange={updateField}
         />
@@ -189,10 +205,10 @@ function BookForm({ book, onCancel, onSubmit, submitLabel }) {
   )
 }
 
-function TextField({ field, onChange, value }) {
+function TextField({ field, label, onChange, value }) {
   return (
     <label className="form-field">
-      <span>{fieldLabels[field]}</span>
+      <span>{label ?? fieldLabels[field]}</span>
       <input
         type="text"
         value={value}

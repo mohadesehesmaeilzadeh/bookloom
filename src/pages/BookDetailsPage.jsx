@@ -4,15 +4,14 @@ import BookFormModal from '../components/books/BookFormModal'
 import BookStatusActions from '../components/books/BookStatusActions'
 import ConfirmDialog from '../components/common/ConfirmDialog'
 import FeedbackMessage from '../components/common/FeedbackMessage'
+import PurchaseBookModal from '../components/wishlist/PurchaseBookModal'
 import { getBookPriorityLabel } from '../constants/bookPriorities'
-import { getBookStatusLabel } from '../constants/bookStatuses'
+import { BOOK_STATUS, getBookStatusLabel } from '../constants/bookStatuses'
 import { ROUTES } from '../constants/routes'
 import { useBooksContext } from '../context/useBooksContext'
+import { formatPrice } from '../utils/formatPrice'
 import { formatDateTime } from '../utils/dateUtils'
-
-function formatNumber(value) {
-  return Number(value).toLocaleString('fa-IR')
-}
+import { createPurchaseConversionPayload } from '../utils/wishlist/purchaseConversion'
 
 function BookDetailsPage() {
   const { bookId } = useParams()
@@ -21,6 +20,7 @@ function BookDetailsPage() {
   const book = getBookById(bookId)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+  const [isPurchaseOpen, setIsPurchaseOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [feedback, setFeedback] = useState('')
   const dismissFeedback = useCallback(() => setFeedback(''), [])
@@ -48,9 +48,9 @@ function BookDetailsPage() {
     ['تاریخ خرید', book.purchaseDate],
     ['تاریخ شروع مطالعه', book.readingStartDate],
     ['تاریخ پایان مطالعه', book.readingEndDate],
-    ['تعداد صفحات', book.totalPages > 0 ? formatNumber(book.totalPages) : ''],
-    ['قیمت خرید', book.price > 0 ? formatNumber(book.price) : ''],
-    ['قیمت تقریبی', book.expectedPrice > 0 ? formatNumber(book.expectedPrice) : ''],
+    ['تعداد صفحات', book.totalPages > 0 ? book.totalPages.toLocaleString('fa-IR') : ''],
+    ['قیمت خرید', formatPrice(book.price)],
+    ['قیمت تقریبی', formatPrice(book.expectedPrice)],
     ['فروشگاه', book.purchaseStore],
     ['یادداشت', book.notes],
     ['تاریخ ثبت', formatDateTime(book.createdAt)],
@@ -76,6 +76,17 @@ function BookDetailsPage() {
     }
   }
 
+  function handlePurchaseConfirm(purchaseValues) {
+    const result = updateBook(book.id, createPurchaseConversionPayload(purchaseValues))
+
+    if (result.success) {
+      setFeedback('کتاب با موفقیت به کتابخانه اضافه شد.')
+      setIsPurchaseOpen(false)
+    }
+  }
+
+  const isWishlistBook = book.status === BOOK_STATUS.WISHLIST
+
   return (
     <section className="book-details-page" aria-labelledby="book-details-title">
       <div className="library-header">
@@ -90,6 +101,15 @@ function BookDetailsPage() {
           <button className="button button-primary" type="button" onClick={() => setIsEditOpen(true)}>
             ویرایش کتاب
           </button>
+          {isWishlistBook ? (
+            <button
+              className="button button-primary"
+              type="button"
+              onClick={() => setIsPurchaseOpen(true)}
+            >
+              خریدمش
+            </button>
+          ) : null}
           <button className="button button-danger-soft" type="button" onClick={() => setIsDeleteOpen(true)}>
             حذف
           </button>
@@ -98,10 +118,29 @@ function BookDetailsPage() {
 
       <FeedbackMessage message={feedback} onDismiss={dismissFeedback} />
 
-      <div className="details-section">
-        <h3>وضعیت مطالعه</h3>
-        <BookStatusActions book={book} onComplete={setFeedback} />
-      </div>
+      {isWishlistBook ? (
+        <div className="details-section">
+          <h3>خرید کتاب</h3>
+          <p className="muted-note">
+            این کتاب هنوز در لیست خرید است. برای انتقال همان رکورد به کتابخانه،
+            خرید را ثبت کن.
+          </p>
+          <div className="status-actions">
+            <button
+              className="button button-primary"
+              type="button"
+              onClick={() => setIsPurchaseOpen(true)}
+            >
+              خریدمش
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="details-section">
+          <h3>وضعیت مطالعه</h3>
+          <BookStatusActions book={book} onComplete={setFeedback} />
+        </div>
+      )}
 
       <div className="details-section book-details">
         <h3>اطلاعات کتاب</h3>
@@ -119,8 +158,16 @@ function BookDetailsPage() {
         book={book}
         isOpen={isEditOpen}
         mode="edit"
+        variant={isWishlistBook ? 'wishlist' : 'default'}
         onClose={() => setIsEditOpen(false)}
         onSubmit={handleEditSubmit}
+      />
+
+      <PurchaseBookModal
+        book={book}
+        isOpen={isPurchaseOpen}
+        onClose={() => setIsPurchaseOpen(false)}
+        onConfirm={handlePurchaseConfirm}
       />
 
       <ConfirmDialog
