@@ -1,6 +1,8 @@
 import { navigationItems } from '../../constants/navigation'
 
-function Sidebar() {
+const enabledNavigationItems = new Set(['dashboard', 'library'])
+
+function Sidebar({ activePage, onNavigate }) {
   return (
     <aside className="app-sidebar" aria-label="ناوبری اصلی">
       <div className="sidebar-brand">
@@ -14,16 +16,27 @@ function Sidebar() {
       </div>
 
       <nav className="sidebar-nav" aria-label="بخش‌های برنامه">
-        {navigationItems.map((item) => (
-          <a
-            key={item.id}
-            className={`sidebar-link${item.id === 'dashboard' ? ' is-active' : ''}`}
-            href={item.path}
-            aria-current={item.id === 'dashboard' ? 'page' : undefined}
-          >
-            {item.label}
-          </a>
-        ))}
+        {navigationItems.map((item) => {
+          const isEnabled = enabledNavigationItems.has(item.id)
+          const isActive = item.id === activePage
+
+          return (
+            <button
+              aria-current={isActive ? 'page' : undefined}
+              className={`sidebar-link${isActive ? ' is-active' : ''}`}
+              disabled={!isEnabled}
+              key={item.id}
+              type="button"
+              onClick={() => {
+                if (isEnabled) {
+                  onNavigate(item.id)
+                }
+              }}
+            >
+              {item.label}
+            </button>
+          )
+        })}
       </nav>
     </aside>
   )
