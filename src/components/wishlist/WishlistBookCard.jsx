@@ -4,7 +4,7 @@ import { getBookDetailsPath } from '../../constants/routes'
 import { formatDateTime } from '../../utils/dateUtils'
 import { formatPrice } from '../../utils/formatPrice'
 
-function WishlistBookCard({ book, onDelete, onEdit, onPurchase }) {
+function WishlistBookCard({ book, layout = 'grid', onDelete, onEdit, onPurchase }) {
   const details = [
     book.author ? `نویسنده: ${book.author}` : '',
     book.category ? `دسته‌بندی: ${book.category}` : '',
@@ -14,7 +14,7 @@ function WishlistBookCard({ book, onDelete, onEdit, onPurchase }) {
   ].filter(Boolean)
 
   return (
-    <article className="book-card wishlist-card">
+    <article className={layout === 'list' ? 'book-list-item wishlist-card' : 'book-card wishlist-card'}>
       <div className="book-card-header">
         <div>
           <h3>{book.title}</h3>

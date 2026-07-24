@@ -1,15 +1,17 @@
 import { useCallback, useState } from 'react'
 import BookFormModal from '../components/books/BookFormModal'
+import BookCollectionToolbar from '../components/books/BookCollectionToolbar'
 import ConfirmDialog from '../components/common/ConfirmDialog'
 import FeedbackMessage from '../components/common/FeedbackMessage'
 import PurchaseBookModal from '../components/wishlist/PurchaseBookModal'
 import WishlistBookGrid from '../components/wishlist/WishlistBookGrid'
-import { bookPriorities } from '../constants/bookPriorities'
+import WishlistBookList from '../components/wishlist/WishlistBookList'
 import { BOOK_STATUS } from '../constants/bookStatuses'
+import { VIEW_MODE } from '../constants/viewModes'
+import { useBookCollectionControls } from '../hooks/useBookCollectionControls'
 import { useBooksContext } from '../context/useBooksContext'
 import { formatPrice } from '../utils/formatPrice'
 import { getWishlistBooks } from '../utils/bookSelectors'
-import { ALL_PRIORITIES, filterWishlistByPriority } from '../utils/wishlist/wishlistFilters'
 import { createPurchaseConversionPayload } from '../utils/wishlist/purchaseConversion'
 import {
   WISHLIST_SORT,
@@ -24,20 +26,19 @@ function formatCount(value) {
 
 function WishlistPage() {
   const { addBook, books, deleteBook, updateBook } = useBooksContext()
-  const [priorityFilter, setPriorityFilter] = useState(ALL_PRIORITIES)
-  const [sortBy, setSortBy] = useState(WISHLIST_SORT.PRIORITY)
   const [formState, setFormState] = useState({ book: null, mode: null })
   const [deleteCandidate, setDeleteCandidate] = useState(null)
   const [purchaseCandidate, setPurchaseCandidate] = useState(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [feedback, setFeedback] = useState('')
   const wishlistBooks = getWishlistBooks(books)
-  const visibleWishlistBooks = sortWishlistBooks(
-    filterWishlistByPriority(wishlistBooks, priorityFilter),
-    sortBy,
-  )
+  const controls = useBookCollectionControls({
+    books: wishlistBooks,
+    initialSort: WISHLIST_SORT.PRIORITY,
+    storageNamespace: 'wishlist',
+    customSort: sortWishlistBooks,
+  })
   const summary = getWishlistSummary(wishlistBooks)
-  const isFiltered = priorityFilter !== ALL_PRIORITIES
   const isFormOpen = Boolean(formState.mode)
 
   const dismissFeedback = useCallback(() => setFeedback(''), [])
@@ -150,43 +151,14 @@ function WishlistPage() {
         ))}
       </div>
 
-      <div className="wishlist-controls">
-        <label className="form-field">
-          <span>فیلتر اولویت</span>
-          <select
-            value={priorityFilter}
-            onChange={(event) => setPriorityFilter(event.target.value)}
-          >
-            <option value={ALL_PRIORITIES}>همه اولویت‌ها</option>
-            {bookPriorities.map((priority) => (
-              <option key={priority.value} value={priority.value}>
-                {priority.label}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label className="form-field">
-          <span>مرتب‌سازی</span>
-          <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
-            {wishlistSortOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        {isFiltered ? (
-          <button
-            className="button button-ghost"
-            type="button"
-            onClick={() => setPriorityFilter(ALL_PRIORITIES)}
-          >
-            پاک کردن فیلتر
-          </button>
-        ) : null}
-      </div>
+      {wishlistBooks.length > 0 ? (
+        <BookCollectionToolbar
+          books={wishlistBooks}
+          controls={controls}
+          enabledFilters={['category', 'priority']}
+          sortOptions={wishlistSortOptions}
+        />
+      ) : null}
 
       {wishlistBooks.length === 0 ? (
         <div className="empty-state">
@@ -196,21 +168,28 @@ function WishlistPage() {
             افزودن اولین کتاب
           </button>
         </div>
-      ) : visibleWishlistBooks.length === 0 ? (
+      ) : controls.visibleBooks.length === 0 ? (
         <div className="empty-state">
-          <h3>کتابی با این اولویت پیدا نشد.</h3>
-          <p>فیلتر اولویت را تغییر بده یا آن را پاک کن.</p>
+          <h3>کتابی با این جست‌وجو یا فیلترها پیدا نشد.</h3>
+          <p>جست‌وجو یا فیلترها را تغییر بده.</p>
           <button
             className="button button-primary"
             type="button"
-            onClick={() => setPriorityFilter(ALL_PRIORITIES)}
+            onClick={controls.clearControls}
           >
-            پاک کردن فیلتر
+            پاک کردن فیلترها
           </button>
         </div>
+      ) : controls.viewMode === VIEW_MODE.LIST ? (
+        <WishlistBookList
+          books={controls.visibleBooks}
+          onDelete={setDeleteCandidate}
+          onEdit={openEditForm}
+          onPurchase={setPurchaseCandidate}
+        />
       ) : (
         <WishlistBookGrid
-          books={visibleWishlistBooks}
+          books={controls.visibleBooks}
           onDelete={setDeleteCandidate}
           onEdit={openEditForm}
           onPurchase={setPurchaseCandidate}

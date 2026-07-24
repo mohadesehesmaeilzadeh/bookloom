@@ -392,6 +392,49 @@ a {
   background: var(--color-surface-soft);
 }
 
+.collection-toolbar {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+}
+
+.toolbar-search {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) auto;
+  align-items: end;
+  gap: var(--space-3);
+}
+
+.toolbar-controls {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  gap: var(--space-3);
+}
+
+.toolbar-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.result-count {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.view-mode-toggle {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
 .inline-link {
   color: var(--color-accent);
   font-weight: 700;
@@ -403,6 +446,54 @@ a {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-4);
+}
+
+.book-list {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.book-list-item {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(180px, 1.4fr) minmax(180px, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.list-main {
+  min-width: 0;
+  display: grid;
+  gap: var(--space-1);
+}
+
+.list-main h3,
+.list-main p,
+.list-price {
+  margin: 0;
+}
+
+.list-main h3 {
+  overflow-wrap: anywhere;
+  color: var(--color-text);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.list-main p,
+.list-main span,
+.list-price {
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+  line-height: 1.7;
+}
+
+.list-progress {
+  min-width: 0;
 }
 
 .book-card {
@@ -791,6 +882,14 @@ a {
   .wishlist-controls {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .toolbar-controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .book-list-item {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 720px) {
@@ -835,6 +934,11 @@ a {
   }
 
   .wishlist-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .toolbar-search,
+  .toolbar-controls {
     grid-template-columns: 1fr;
   }
 

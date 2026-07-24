@@ -1,6 +1,11 @@
 import { useCallback, useState } from 'react'
+import { BOOK_SORT, bookSortOptions } from '../../constants/bookSortOptions'
+import { VIEW_MODE } from '../../constants/viewModes'
+import { useBookCollectionControls } from '../../hooks/useBookCollectionControls'
 import BookFormModal from './BookFormModal'
 import BookGrid from './BookGrid'
+import BookList from './BookList'
+import BookCollectionToolbar from './BookCollectionToolbar'
 import ProgressUpdateController from './ProgressUpdateController'
 import ConfirmDialog from '../common/ConfirmDialog'
 import FeedbackMessage from '../common/FeedbackMessage'
@@ -14,7 +19,13 @@ function BookCollectionView({
   emptyActionLabel,
   emptyDescription,
   emptyTitle,
+  enabledFilters = [],
+  initialSort = BOOK_SORT.NEWEST,
+  noResultsDescription = 'جست‌وجو یا فیلترها را تغییر بده.',
+  noResultsTitle = 'کتابی با این جست‌وجو یا فیلترها پیدا نشد.',
   showProgressDetails = false,
+  sortOptions = bookSortOptions,
+  storageNamespace = 'library',
   title,
 }) {
   const { addBook, deleteBook, updateBook } = useBooksContext()
@@ -23,6 +34,11 @@ function BookCollectionView({
   const [deleteCandidate, setDeleteCandidate] = useState(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [feedback, setFeedback] = useState('')
+  const controls = useBookCollectionControls({
+    books,
+    initialSort,
+    storageNamespace,
+  })
   const isFormOpen = Boolean(formState.mode)
 
   const dismissFeedback = useCallback(() => setFeedback(''), [])
@@ -85,6 +101,15 @@ function BookCollectionView({
 
       <FeedbackMessage message={feedback} onDismiss={dismissFeedback} />
 
+      {books.length > 0 ? (
+        <BookCollectionToolbar
+          books={books}
+          controls={controls}
+          enabledFilters={enabledFilters}
+          sortOptions={sortOptions}
+        />
+      ) : null}
+
       {books.length === 0 ? (
         <div className="empty-state">
           <h3>{emptyTitle}</h3>
@@ -95,9 +120,30 @@ function BookCollectionView({
             </button>
           ) : null}
         </div>
+      ) : controls.visibleBooks.length === 0 ? (
+        <div className="empty-state">
+          <h3>{noResultsTitle}</h3>
+          <p>{noResultsDescription}</p>
+          <button
+            className="button button-primary"
+            type="button"
+            onClick={controls.clearControls}
+          >
+            پاک کردن فیلترها
+          </button>
+        </div>
+      ) : controls.viewMode === VIEW_MODE.LIST ? (
+        <BookList
+          books={controls.visibleBooks}
+          onDelete={setDeleteCandidate}
+          onEdit={openEditForm}
+          onProgressUpdate={setProgressBook}
+          showProgressDetails={showProgressDetails}
+          onStatusChange={setFeedback}
+        />
       ) : (
         <BookGrid
-          books={books}
+          books={controls.visibleBooks}
           onDelete={setDeleteCandidate}
           onEdit={openEditForm}
           onProgressUpdate={setProgressBook}
