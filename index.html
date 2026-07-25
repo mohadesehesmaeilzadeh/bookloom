@@ -1,12 +1,48 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>bookloom</title>
+    <title>بوک‌لوم</title>
   </head>
   <body>
+    <script>
+      ;(() => {
+        try {
+          const defaults = {
+            theme: 'system',
+            accentColor: 'indigo',
+            usePersianDigits: true,
+          }
+          const rawPreferences = window.localStorage.getItem('bookloom_preferences')
+          const preferences = rawPreferences ? JSON.parse(rawPreferences) : defaults
+          const theme = ['light', 'dark', 'system'].includes(preferences.theme)
+            ? preferences.theme
+            : defaults.theme
+          const accent = ['indigo', 'emerald', 'rose', 'amber', 'slate'].includes(
+            preferences.accentColor,
+          )
+            ? preferences.accentColor
+            : defaults.accentColor
+          const resolvedTheme =
+            theme === 'system'
+              ? window.matchMedia?.('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light'
+              : theme
+
+          document.documentElement.dataset.theme = resolvedTheme
+          document.documentElement.dataset.accent = accent
+          document.documentElement.dataset.persianDigits =
+            preferences.usePersianDigits === false ? 'false' : 'true'
+        } catch {
+          document.documentElement.dataset.theme = 'light'
+          document.documentElement.dataset.accent = 'indigo'
+          document.documentElement.dataset.persianDigits = 'true'
+        }
+      })()
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
