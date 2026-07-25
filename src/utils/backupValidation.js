@@ -4,7 +4,7 @@ import {
 } from '../constants/backupSchema'
 import { normalizeBook } from './bookValidation'
 import { getBackupSummary } from './backupSummary'
-import { normalizeCollectionPreferences } from './collectionPreferences'
+import { normalizePreferences } from './preferenceValidation'
 import { normalizeReadingGoals } from './readingGoalStorage'
 
 function isRecord(value) {
@@ -74,7 +74,7 @@ export function validateBackupStructure(parsedBackup) {
     errors.push('نسخه فایل پشتیبان معتبر نیست.')
   } else if (parsedBackup.schemaVersion > CURRENT_BACKUP_SCHEMA_VERSION) {
     errors.push('نسخه این فایل پشتیبان توسط نسخه فعلی Bookloom پشتیبانی نمی‌شود.')
-  } else if (parsedBackup.schemaVersion < CURRENT_BACKUP_SCHEMA_VERSION) {
+  } else if (parsedBackup.schemaVersion < 1) {
     errors.push('نسخه قدیمی این فایل پشتیبان بدون مهاجرت ایمن پشتیبانی نمی‌شود.')
   }
 
@@ -122,13 +122,15 @@ export function validateBackupStructure(parsedBackup) {
     warnings.push('فایل پشتیبان شامل شناسه تکراری کتاب است؛ هنگام بازیابی نسخه جدیدتر نگه داشته می‌شود.')
   }
   const readingGoals = normalizeReadingGoals(parsedBackup.data.readingGoals)
-  const collectionPreferences = normalizeCollectionPreferences(
-    parsedBackup.data.collectionPreferences,
+  const preferences = normalizePreferences(
+    parsedBackup.schemaVersion === 1
+      ? parsedBackup.data.collectionPreferences
+      : parsedBackup.data.preferences,
   )
   const preview = getBackupSummary({
     books: normalizedBooks,
     readingGoals,
-    collectionPreferences,
+    preferences,
   })
 
   return {
@@ -140,7 +142,7 @@ export function validateBackupStructure(parsedBackup) {
       data: {
         books: normalizedBooks,
         readingGoals,
-        collectionPreferences,
+        preferences,
       },
       preview,
     },

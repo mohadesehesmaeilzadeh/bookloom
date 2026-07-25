@@ -1,5 +1,5 @@
 import { normalizeBook, normalizeBooks } from './bookValidation'
-import { normalizeCollectionPreferences } from './collectionPreferences'
+import { normalizePreferencePatch, normalizePreferences } from './preferenceValidation'
 import { normalizeReadingGoals } from './readingGoalStorage'
 
 function timestamp(value) {
@@ -119,37 +119,39 @@ export function mergeReadingGoals(currentGoals, importedGoals) {
 }
 
 export function mergeCollectionPreferences(currentPreferences, importedPreferences) {
-  const current = normalizeCollectionPreferences(currentPreferences)
-  const imported = normalizeCollectionPreferences(importedPreferences)
+  const current = normalizePreferences(currentPreferences)
+  const imported = normalizePreferencePatch(importedPreferences)
   const mergedPreferences = { ...current }
   let filledPreferences = 0
 
   for (const [key, value] of Object.entries(imported)) {
-    if (!Object.prototype.hasOwnProperty.call(mergedPreferences, key)) {
+    if (!Object.prototype.hasOwnProperty.call(currentPreferences ?? {}, key)) {
       mergedPreferences[key] = value
       filledPreferences += 1
     }
   }
 
   return {
-    collectionPreferences: mergedPreferences,
+    preferences: normalizePreferences(mergedPreferences),
     summary: { filledPreferences },
   }
 }
+
+export const mergePreferences = mergeCollectionPreferences
 
 export function createMergedBookloomData(currentData, importedData) {
   const bookMerge = mergeBooks(currentData.books, importedData.books)
   const goalMerge = mergeReadingGoals(currentData.readingGoals, importedData.readingGoals)
   const preferenceMerge = mergeCollectionPreferences(
-    currentData.collectionPreferences,
-    importedData.collectionPreferences,
+    currentData.preferences ?? currentData.collectionPreferences,
+    importedData.preferences ?? importedData.collectionPreferences,
   )
 
   return {
     data: {
       books: bookMerge.books,
       readingGoals: goalMerge.readingGoals,
-      collectionPreferences: preferenceMerge.collectionPreferences,
+      preferences: preferenceMerge.preferences,
     },
     summary: {
       books: bookMerge.summary,

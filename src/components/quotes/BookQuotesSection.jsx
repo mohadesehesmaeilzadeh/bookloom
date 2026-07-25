@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import ConfirmDialog from '../common/ConfirmDialog'
+import { usePreferences } from '../../context/usePreferences'
 import { formatNumber } from '../../utils/formatNumber'
 import { sortQuotesByCreatedAt } from '../../utils/bookQuotes'
 import {
@@ -10,6 +11,7 @@ import QuoteCard from './QuoteCard'
 import QuoteFormModal from './QuoteFormModal'
 
 function BookQuotesSection({ book, onFeedback, onUpdateBook }) {
+  const { preferences } = usePreferences()
   const [formState, setFormState] = useState({ mode: null, quote: null })
   const [deleteCandidate, setDeleteCandidate] = useState(null)
   const quotes = sortQuotesByCreatedAt(book.quotes ?? [])
@@ -71,6 +73,21 @@ function BookQuotesSection({ book, onFeedback, onUpdateBook }) {
     }
   }
 
+  function requestDelete(quote) {
+    if (preferences.confirmBeforeDelete) {
+      setDeleteCandidate(quote)
+      return
+    }
+
+    const result = onUpdateBook(book.id, {
+      quotes: book.quotes.filter((bookQuote) => bookQuote.id !== quote.id),
+    })
+
+    if (result.success) {
+      onFeedback('نقل‌قول حذف شد.')
+    }
+  }
+
   return (
     <section className="details-section quotes-section" aria-labelledby="book-quotes-title">
       <div className="dashboard-item-header">
@@ -93,7 +110,7 @@ function BookQuotesSection({ book, onFeedback, onUpdateBook }) {
             <QuoteCard
               key={quote.id}
               quote={quote}
-              onDelete={setDeleteCandidate}
+              onDelete={requestDelete}
               onEdit={(selectedQuote) => setFormState({ mode: 'edit', quote: selectedQuote })}
             />
           ))}

@@ -4,10 +4,11 @@ import {
 } from '../constants/backupSchema'
 import { getTodayDateString } from './dateUtils'
 import { normalizeBooks } from './bookValidation'
-import { loadCollectionPreferences } from './collectionPreferences'
+import { loadPreferences } from './preferenceStorage'
+import { normalizePreferences } from './preferenceValidation'
 import { loadReadingGoals } from './readingGoalStorage'
 
-export function createBackupPayload({ books, collectionPreferences, readingGoals }) {
+export function createBackupPayload({ books, preferences, collectionPreferences, readingGoals }) {
   return {
     app: BACKUP_APP_NAME,
     schemaVersion: CURRENT_BACKUP_SCHEMA_VERSION,
@@ -15,16 +16,16 @@ export function createBackupPayload({ books, collectionPreferences, readingGoals
     data: {
       books: normalizeBooks(books),
       readingGoals: readingGoals ?? { annualGoals: {} },
-      collectionPreferences: collectionPreferences ?? {},
+      preferences: normalizePreferences(preferences ?? collectionPreferences),
     },
   }
 }
 
-export function getCurrentBookloomSnapshot(books) {
+export function getCurrentBookloomSnapshot(books, preferences = loadPreferences()) {
   return {
     books: normalizeBooks(books),
     readingGoals: loadReadingGoals(),
-    collectionPreferences: loadCollectionPreferences(),
+    preferences: normalizePreferences(preferences),
   }
 }
 

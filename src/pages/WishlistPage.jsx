@@ -10,6 +10,8 @@ import { BOOK_STATUS } from '../constants/bookStatuses'
 import { VIEW_MODE } from '../constants/viewModes'
 import { useBookCollectionControls } from '../hooks/useBookCollectionControls'
 import { useBooksContext } from '../context/useBooksContext'
+import { usePreferences } from '../context/usePreferences'
+import { formatNumber } from '../utils/formatNumber'
 import { formatPrice } from '../utils/formatPrice'
 import { getWishlistBooks } from '../utils/bookSelectors'
 import { createPurchaseConversionPayload } from '../utils/wishlist/purchaseConversion'
@@ -20,12 +22,9 @@ import {
 } from '../utils/wishlist/wishlistSorting'
 import { getWishlistSummary } from '../utils/wishlist/wishlistSummary'
 
-function formatCount(value) {
-  return value.toLocaleString('fa-IR')
-}
-
 function WishlistPage() {
   const { addBook, books, deleteBook, updateBook } = useBooksContext()
+  const { preferences } = usePreferences()
   const [formState, setFormState] = useState({ book: null, mode: null })
   const [deleteCandidate, setDeleteCandidate] = useState(null)
   const [purchaseCandidate, setPurchaseCandidate] = useState(null)
@@ -90,6 +89,19 @@ function WishlistPage() {
     }
   }
 
+  function requestDelete(book) {
+    if (preferences.confirmBeforeDelete) {
+      setDeleteCandidate(book)
+      return
+    }
+
+    const result = deleteBook(book.id)
+
+    if (result.success) {
+      setFeedback('کتاب حذف شد.')
+    }
+  }
+
   function handlePurchaseConfirm(purchaseValues) {
     if (!purchaseCandidate) {
       return
@@ -109,7 +121,7 @@ function WishlistPage() {
   const summaryCards = [
     {
       label: 'تعداد کتاب‌های لیست خرید',
-      value: formatCount(summary.totalCount),
+      value: formatNumber(summary.totalCount),
     },
     {
       label: 'مجموع قیمت تقریبی',
@@ -117,11 +129,11 @@ function WishlistPage() {
     },
     {
       label: 'کتاب‌های با اولویت بالا',
-      value: formatCount(summary.highPriorityCount),
+      value: formatNumber(summary.highPriorityCount),
     },
     {
       label: 'کتاب‌های ضروری',
-      value: formatCount(summary.urgentPriorityCount),
+      value: formatNumber(summary.urgentPriorityCount),
     },
   ]
 
@@ -183,14 +195,14 @@ function WishlistPage() {
       ) : controls.viewMode === VIEW_MODE.LIST ? (
         <WishlistBookList
           books={controls.visibleBooks}
-          onDelete={setDeleteCandidate}
+          onDelete={requestDelete}
           onEdit={openEditForm}
           onPurchase={setPurchaseCandidate}
         />
       ) : (
         <WishlistBookGrid
           books={controls.visibleBooks}
-          onDelete={setDeleteCandidate}
+          onDelete={requestDelete}
           onEdit={openEditForm}
           onPurchase={setPurchaseCandidate}
         />

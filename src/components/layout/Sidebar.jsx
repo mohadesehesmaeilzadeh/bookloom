@@ -1,9 +1,13 @@
 import { NavLink } from 'react-router-dom'
 import { navigationItems } from '../../constants/navigation'
 
-function Sidebar() {
+function Sidebar({ isOpen = false, onClose }) {
   return (
-    <aside className="app-sidebar" aria-label="ناوبری اصلی">
+    <aside
+      aria-label="ناوبری اصلی"
+      className={`app-sidebar${isOpen ? ' is-open' : ''}`}
+      id="app-sidebar"
+    >
       <div className="sidebar-brand">
         <span className="brand-mark" aria-hidden="true">
           ب
@@ -21,6 +25,7 @@ function Sidebar() {
             end={item.path === '/'}
             key={item.id}
             to={item.path}
+            onClick={onClose}
           >
             {item.label}
           </NavLink>

@@ -1,12 +1,29 @@
-import { useEffect, useId } from 'react'
+import { useEffect, useId, useRef } from 'react'
+
+let openModalCount = 0
+let previousBodyOverflow = ''
+
+const focusableSelector = [
+  '[data-autofocus]',
+  'button:not([disabled])',
+  'a[href]',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(',')
 
 function Modal({ children, isOpen, onClose, title }) {
   const titleId = useId()
+  const dialogRef = useRef(null)
+  const previousFocusRef = useRef(null)
 
   useEffect(() => {
     if (!isOpen) {
       return undefined
     }
+
+    previousFocusRef.current = document.activeElement
 
     function handleKeyDown(event) {
       if (event.key === 'Escape') {
@@ -14,13 +31,34 @@ function Modal({ children, isOpen, onClose, title }) {
       }
     }
 
-    const previousOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
+    if (openModalCount === 0) {
+      previousBodyOverflow = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+    }
+
+    openModalCount += 1
     document.addEventListener('keydown', handleKeyDown)
 
+    window.requestAnimationFrame(() => {
+      const focusTarget = dialogRef.current?.querySelector(focusableSelector)
+      focusTarget?.focus()
+    })
+
     return () => {
-      document.body.style.overflow = previousOverflow
+      openModalCount = Math.max(0, openModalCount - 1)
+
+      if (openModalCount === 0) {
+        document.body.style.overflow = previousBodyOverflow
+      }
+
       document.removeEventListener('keydown', handleKeyDown)
+
+      if (
+        previousFocusRef.current &&
+        typeof previousFocusRef.current.focus === 'function'
+      ) {
+        previousFocusRef.current.focus()
+      }
     }
   }, [isOpen, onClose])
 
@@ -34,6 +72,7 @@ function Modal({ children, isOpen, onClose, title }) {
         aria-labelledby={titleId}
         aria-modal="true"
         className="modal-dialog"
+        ref={dialogRef}
         role="dialog"
         onMouseDown={(event) => event.stopPropagation()}
       >

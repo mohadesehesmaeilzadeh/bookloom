@@ -14,6 +14,7 @@ import { getBookPriorityLabel } from '../constants/bookPriorities'
 import { BOOK_STATUS, getBookStatusLabel } from '../constants/bookStatuses'
 import { ROUTES } from '../constants/routes'
 import { useBooksContext } from '../context/useBooksContext'
+import { usePreferences } from '../context/usePreferences'
 import { formatDate, formatDateTime } from '../utils/dateUtils'
 import { formatNumber } from '../utils/formatNumber'
 import { formatPrice } from '../utils/formatPrice'
@@ -43,6 +44,7 @@ function BookDetailsPage() {
   const { bookId } = useParams()
   const navigate = useNavigate()
   const { deleteBook, getBookById, updateBook } = useBooksContext()
+  const { preferences } = usePreferences()
   const book = getBookById(bookId)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
@@ -118,6 +120,15 @@ function BookDetailsPage() {
     }
   }
 
+  function requestDelete() {
+    if (preferences.confirmBeforeDelete) {
+      setIsDeleteOpen(true)
+      return
+    }
+
+    handleDeleteConfirm()
+  }
+
   function handlePurchaseConfirm(purchaseValues) {
     const result = updateBook(book.id, createPurchaseConversionPayload(purchaseValues))
 
@@ -174,7 +185,7 @@ function BookDetailsPage() {
               خریدمش
             </button>
           ) : null}
-          <button className="button button-danger-soft" type="button" onClick={() => setIsDeleteOpen(true)}>
+          <button className="button button-danger-soft" type="button" onClick={requestDelete}>
             حذف
           </button>
         </div>

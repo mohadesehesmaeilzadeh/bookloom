@@ -10,6 +10,7 @@ import ProgressUpdateController from './ProgressUpdateController'
 import ConfirmDialog from '../common/ConfirmDialog'
 import FeedbackMessage from '../common/FeedbackMessage'
 import { useBooksContext } from '../../context/useBooksContext'
+import { usePreferences } from '../../context/usePreferences'
 
 function BookCollectionView({
   addButtonLabel = 'افزودن کتاب',
@@ -30,6 +31,7 @@ function BookCollectionView({
   title,
 }) {
   const { addBook, deleteBook, updateBook } = useBooksContext()
+  const { preferences } = usePreferences()
   const [formState, setFormState] = useState({ book: null, mode: null })
   const [progressBook, setProgressBook] = useState(null)
   const [deleteCandidate, setDeleteCandidate] = useState(null)
@@ -86,6 +88,19 @@ function BookCollectionView({
     }
   }
 
+  function requestDelete(book) {
+    if (preferences.confirmBeforeDelete) {
+      setDeleteCandidate(book)
+      return
+    }
+
+    const result = deleteBook(book.id)
+
+    if (result.success) {
+      setFeedback('کتاب حذف شد.')
+    }
+  }
+
   return (
     <section className="library-page" aria-labelledby="collection-title">
       <div className="library-header">
@@ -139,7 +154,7 @@ function BookCollectionView({
       ) : controls.viewMode === VIEW_MODE.LIST ? (
         <BookList
           books={controls.visibleBooks}
-          onDelete={setDeleteCandidate}
+          onDelete={requestDelete}
           onEdit={openEditForm}
           onProgressUpdate={setProgressBook}
           showProgressDetails={showProgressDetails}
@@ -148,7 +163,7 @@ function BookCollectionView({
       ) : (
         <BookGrid
           books={controls.visibleBooks}
-          onDelete={setDeleteCandidate}
+          onDelete={requestDelete}
           onEdit={openEditForm}
           onProgressUpdate={setProgressBook}
           showProgressDetails={showProgressDetails}

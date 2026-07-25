@@ -1,12 +1,17 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
+import AccentColorSelector from '../components/settings/AccentColorSelector'
 import BackupExportSection from '../components/settings/BackupExportSection'
 import BackupImportSection from '../components/settings/BackupImportSection'
+import PreferenceToggle from '../components/settings/PreferenceToggle'
 import ResetBookloomData from '../components/settings/ResetBookloomData'
+import StartPageSelector from '../components/settings/StartPageSelector'
+import ThemeSelector from '../components/settings/ThemeSelector'
 import ConfirmDialog from '../components/common/ConfirmDialog'
 import FeedbackMessage from '../components/common/FeedbackMessage'
 import { MAX_BACKUP_FILE_SIZE_BYTES } from '../constants/backupSchema'
 import { RESTORE_MODE } from '../constants/restoreModes'
 import { useBooksContext } from '../context/useBooksContext'
+import { usePreferences } from '../context/usePreferences'
 import {
   createBackupFilename,
   createBackupPayload,
@@ -18,15 +23,18 @@ import { createMergedBookloomData, resolveImportedBookDuplicates } from '../util
 import { getBackupSummary } from '../utils/backupSummary'
 import { parseBackupFileContent, validateBackupStructure } from '../utils/backupValidation'
 import { clearBooks } from '../utils/bookStorage'
-import {
-  clearCollectionPreferences,
-  saveCollectionPreferences,
-} from '../utils/collectionPreferences'
 import { formatNumber } from '../utils/formatNumber'
+import { clearPreferences } from '../utils/preferenceStorage'
 import { clearReadingGoals, saveReadingGoals } from '../utils/readingGoalStorage'
 
 function SettingsPage() {
   const { books, replaceBooks } = useBooksContext()
+  const {
+    preferences,
+    replacePreferences,
+    resetPreferences,
+    updatePreference,
+  } = usePreferences()
   const fileInputRef = useRef(null)
   const [feedback, setFeedback] = useState('')
   const [fileName, setFileName] = useState('')
@@ -36,8 +44,12 @@ function SettingsPage() {
   const [restoreMode, setRestoreMode] = useState(RESTORE_MODE.MERGE)
   const [pendingRestoreMode, setPendingRestoreMode] = useState(null)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [isPreferenceResetOpen, setIsPreferenceResetOpen] = useState(false)
 
-  const currentSnapshot = useMemo(() => getCurrentBookloomSnapshot(books), [books])
+  const currentSnapshot = useMemo(
+    () => getCurrentBookloomSnapshot(books, preferences),
+    [books, preferences],
+  )
   const currentSummary = useMemo(() => getBackupSummary(currentSnapshot), [currentSnapshot])
   const mergePreview = useMemo(() => {
     if (!validationResult?.valid) {
@@ -63,8 +75,17 @@ function SettingsPage() {
     setFeedback(message)
   }, [])
 
+  const handlePreferenceChange = useCallback((key, value) => {
+    const result = updatePreference(key, value)
+    showFeedback(
+      result.success
+        ? 'تنظیمات ذخیره شد.'
+        : 'ذخیره تنظیمات انجام نشد.',
+    )
+  }, [showFeedback, updatePreference])
+
   const handleExport = useCallback(() => {
-    const snapshot = getCurrentBookloomSnapshot(books)
+    const snapshot = getCurrentBookloomSnapshot(books, preferences)
     const backup = createBackupPayload(snapshot)
     const serializedBackup = serializeBackup(backup)
     const didDownload = downloadBackupFile(serializedBackup, createBackupFilename())
@@ -74,20 +95,20 @@ function SettingsPage() {
         ? 'فایل پشتیبان Bookloom آماده شد.'
         : 'ساخت فایل پشتیبان انجام نشد. دوباره تلاش کن.',
     )
-  }, [books, showFeedback])
+  }, [books, preferences, showFeedback])
 
   const restoreSnapshot = useCallback(
     (snapshot) => {
       replaceBooks(snapshot.books)
       saveReadingGoals(snapshot.readingGoals)
-      saveCollectionPreferences(snapshot.collectionPreferences)
+      replacePreferences(snapshot.preferences)
     },
-    [replaceBooks],
+    [replaceBooks, replacePreferences],
   )
 
   const persistSnapshot = useCallback(
     (snapshot) => {
-      const previousSnapshot = getCurrentBookloomSnapshot(books)
+      const previousSnapshot = getCurrentBookloomSnapshot(books, preferences)
       const bookResult = replaceBooks(snapshot.books)
 
       if (!bookResult.success) {
@@ -95,16 +116,16 @@ function SettingsPage() {
       }
 
       const didSaveGoals = saveReadingGoals(snapshot.readingGoals)
-      const didSavePreferences = saveCollectionPreferences(snapshot.collectionPreferences)
+      const preferenceResult = replacePreferences(snapshot.preferences)
 
-      if (!didSaveGoals || !didSavePreferences) {
+      if (!didSaveGoals || !preferenceResult.success) {
         restoreSnapshot(previousSnapshot)
         return false
       }
 
       return true
     },
-    [books, replaceBooks, restoreSnapshot],
+    [books, preferences, replaceBooks, replacePreferences, restoreSnapshot],
   )
 
   const handleFileSelect = useCallback(async (event) => {
@@ -192,13 +213,20 @@ function SettingsPage() {
   ])
 
   const handleReset = useCallback(() => {
-    const previousSnapshot = getCurrentBookloomSnapshot(books)
+    const previousSnapshot = getCurrentBookloomSnapshot(books, preferences)
     const didClearBooks = clearBooks()
     const didClearGoals = clearReadingGoals()
-    const didClearPreferences = clearCollectionPreferences()
+    const didClearPreferences = clearPreferences()
     const stateResult = replaceBooks([], { persist: false })
+    const preferenceResult = resetPreferences({ persist: false })
 
-    if (!didClearBooks || !didClearGoals || !didClearPreferences || !stateResult.success) {
+    if (
+      !didClearBooks ||
+      !didClearGoals ||
+      !didClearPreferences ||
+      !stateResult.success ||
+      !preferenceResult.success
+    ) {
       restoreSnapshot(previousSnapshot)
       showFeedback('پاک کردن اطلاعات انجام نشد و اطلاعات قبلی حفظ شد.')
       return
@@ -206,7 +234,26 @@ function SettingsPage() {
 
     resetImportState()
     showFeedback('اطلاعات Bookloom از این مرورگر پاک شد.')
-  }, [books, replaceBooks, resetImportState, restoreSnapshot, showFeedback])
+  }, [
+    books,
+    preferences,
+    replaceBooks,
+    resetImportState,
+    resetPreferences,
+    restoreSnapshot,
+    showFeedback,
+  ])
+
+  function handlePreferenceResetConfirm() {
+    const result = resetPreferences()
+
+    setIsPreferenceResetOpen(false)
+    showFeedback(
+      result.success
+        ? 'تنظیمات Bookloom به حالت پیش‌فرض بازگردانده شد.'
+        : 'بازگرداندن تنظیمات انجام نشد.',
+    )
+  }
 
   const restoreTitle =
     pendingRestoreMode === RESTORE_MODE.REPLACE ? 'جایگزینی اطلاعات' : 'ادغام اطلاعات'
@@ -221,10 +268,58 @@ function SettingsPage() {
         <span className="page-kicker">پیکربندی</span>
         <h2 id="settings-title">تنظیمات</h2>
         <p>
-          از داده‌های Bookloom فایل پشتیبان بگیر، اطلاعات قبلی را بازیابی کن، یا فقط داده‌های
-          Bookloom را از همین مرورگر پاک کن.
+          ظاهر، رفتار، فایل‌های پشتیبان و داده‌های Bookloom را از این بخش مدیریت کن.
         </p>
       </div>
+
+      <section className="settings-section" aria-labelledby="appearance-settings-title">
+        <div>
+          <h2 id="appearance-settings-title">ظاهر و نمایش</h2>
+          <p>تم، رنگ اصلی، رقم‌های نمایشی و صفحه شروع برنامه را تنظیم کن.</p>
+        </div>
+        <div className="settings-card">
+          <ThemeSelector
+            selectedTheme={preferences.theme}
+            onChange={(value) => handlePreferenceChange('theme', value)}
+          />
+          <AccentColorSelector
+            selectedAccentColor={preferences.accentColor}
+            onChange={(value) => handlePreferenceChange('accentColor', value)}
+          />
+          <PreferenceToggle
+            checked={preferences.usePersianDigits}
+            description="عددهای نمایشی مانند تعداد صفحات، قیمت‌ها و آمار با رقم‌های فارسی نمایش داده شوند."
+            label="نمایش اعداد با رقم‌های فارسی"
+            onChange={(value) => handlePreferenceChange('usePersianDigits', value)}
+          />
+          <StartPageSelector
+            selectedStartPage={preferences.defaultStartPage}
+            onChange={(value) => handlePreferenceChange('defaultStartPage', value)}
+          />
+        </div>
+      </section>
+
+      <section className="settings-section" aria-labelledby="behavior-settings-title">
+        <div>
+          <h2 id="behavior-settings-title">رفتار برنامه</h2>
+          <p>تنظیمات رفتاری Bookloom را بدون تغییر کتاب‌ها مدیریت کن.</p>
+        </div>
+        <div className="settings-card">
+          <PreferenceToggle
+            checked={preferences.confirmBeforeDelete}
+            description="پیش از حذف کتاب یا نقل‌قول، پیام تأیید نمایش داده شود."
+            label="تأیید قبل از حذف"
+            onChange={(value) => handlePreferenceChange('confirmBeforeDelete', value)}
+          />
+          <button
+            className="button button-secondary"
+            type="button"
+            onClick={() => setIsPreferenceResetOpen(true)}
+          >
+            بازگرداندن تنظیمات به حالت پیش‌فرض
+          </button>
+        </div>
+      </section>
 
       <BackupExportSection bookCount={currentSummary.bookCount} onExport={handleExport} />
 
@@ -249,7 +344,7 @@ function SettingsPage() {
       <section className="settings-section" aria-labelledby="storage-summary-title">
         <div>
           <h2 id="storage-summary-title">خلاصه داده‌های فعلی</h2>
-          <p>این بخش فقط داده‌هایی را نشان می‌دهد که در فایل پشتیبان Bookloom ذخیره می‌شوند.</p>
+          <p>این بخش داده‌هایی را نشان می‌دهد که در فایل پشتیبان Bookloom ذخیره می‌شوند.</p>
         </div>
         <dl className="settings-card backup-summary-grid">
           <div>
@@ -265,7 +360,7 @@ function SettingsPage() {
             <dd>{formatNumber(currentSummary.readingGoalYearCount)}</dd>
           </div>
           <div>
-            <dt>تنظیمات نمایش</dt>
+            <dt>تنظیمات برنامه</dt>
             <dd>{currentSummary.hasCollectionPreferences ? 'ذخیره شده' : 'ثبت نشده'}</dd>
           </div>
         </dl>
@@ -281,6 +376,15 @@ function SettingsPage() {
         title={restoreTitle}
         onCancel={() => setPendingRestoreMode(null)}
         onConfirm={handleConfirmRestore}
+      />
+
+      <ConfirmDialog
+        confirmLabel="بازگرداندن تنظیمات"
+        isOpen={isPreferenceResetOpen}
+        message="تنظیمات ظاهری، رفتاری و حالت نمایش فهرست‌ها به مقدار پیش‌فرض برمی‌گردد. کتاب‌ها، یادداشت‌ها، نقل‌قول‌ها و اهداف مطالعه حذف نمی‌شوند."
+        title="بازگرداندن تنظیمات پیش‌فرض"
+        onCancel={() => setIsPreferenceResetOpen(false)}
+        onConfirm={handlePreferenceResetConfirm}
       />
 
       <FeedbackMessage message={feedback} onDismiss={() => setFeedback('')} />

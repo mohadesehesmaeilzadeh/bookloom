@@ -1,28 +1,33 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
+import { useToast } from '../../context/useToast'
 
-function FeedbackMessage({ message, onDismiss }) {
+function FeedbackMessage({ message, onDismiss, type = 'success' }) {
+  const { showToast } = useToast()
+  const lastMessageRef = useRef('')
+
   useEffect(() => {
-    if (!message) {
+    if (!message || lastMessageRef.current === message) {
       return undefined
     }
 
-    const timeoutId = window.setTimeout(onDismiss, 3200)
+    lastMessageRef.current = message
+    showToast({ message, type })
+  }, [message, showToast, type])
 
-    return () => window.clearTimeout(timeoutId)
+  useEffect(() => {
+    if (!message) {
+      lastMessageRef.current = ''
+      return undefined
+    }
+
+    const clearMessageId = window.setTimeout(() => {
+      onDismiss?.()
+    }, 0)
+
+    return () => window.clearTimeout(clearMessageId)
   }, [message, onDismiss])
 
-  if (!message) {
-    return null
-  }
-
-  return (
-    <div className="feedback-message" role="status">
-      <span>{message}</span>
-      <button className="button button-ghost" type="button" onClick={onDismiss}>
-        بستن
-      </button>
-    </div>
-  )
+  return null
 }
 
 export default FeedbackMessage

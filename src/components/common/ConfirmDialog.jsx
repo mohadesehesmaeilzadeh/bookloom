@@ -15,7 +15,7 @@ function ConfirmDialog({
       <div className="confirm-dialog">
         <p>{message}</p>
         <div className="form-actions">
-          <button className="button button-secondary" type="button" onClick={onCancel}>
+          <button className="button button-secondary" data-autofocus type="button" onClick={onCancel}>
             {cancelLabel}
           </button>
           <button

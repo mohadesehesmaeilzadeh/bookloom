@@ -1,13 +1,10 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { BOOK_SORT } from '../constants/bookSortOptions'
 import { DEFAULT_VIEW_MODE } from '../constants/viewModes'
+import { usePreferences } from '../context/usePreferences'
 import { applyBookFilters, ALL_FILTER_VALUE } from '../utils/bookFilters'
 import { searchBooks } from '../utils/bookSearch'
 import { sortBooks } from '../utils/bookSorting'
-import {
-  loadCollectionPreferences,
-  saveCollectionViewMode,
-} from '../utils/collectionPreferences'
 
 function createInitialFilters() {
   return {
@@ -24,17 +21,16 @@ export function useBookCollectionControls({
   storageNamespace,
   customSort,
 }) {
+  const { preferences, updatePreference } = usePreferences()
   const [searchQuery, setSearchQuery] = useState('')
   const [filters, setFilters] = useState(createInitialFilters)
   const [sortBy, setSortBy] = useState(initialSort)
-  const [viewMode, setViewMode] = useState(() => {
-    const preferences = loadCollectionPreferences()
-    return preferences[`${storageNamespace}ViewMode`] ?? DEFAULT_VIEW_MODE
-  })
+  const viewModePreferenceKey = `${storageNamespace}ViewMode`
+  const viewMode = preferences[viewModePreferenceKey] ?? DEFAULT_VIEW_MODE
 
-  useEffect(() => {
-    saveCollectionViewMode(storageNamespace, viewMode)
-  }, [storageNamespace, viewMode])
+  function setViewMode(nextViewMode) {
+    updatePreference(viewModePreferenceKey, nextViewMode)
+  }
 
   const visibleBooks = useMemo(() => {
     const searchedBooks = searchBooks(books, searchQuery)

@@ -4,13 +4,10 @@ import { getBookStatusLabel } from '../../constants/bookStatuses'
 import { getBookDetailsPath } from '../../constants/routes'
 import { BOOK_STATUS } from '../../constants/bookStatuses'
 import { formatDateTime } from '../../utils/dateUtils'
+import { formatNumber } from '../../utils/formatNumber'
 import BookStatusActions from './BookStatusActions'
 import BookRating from './BookRating'
 import ReadingProgressBar from './ReadingProgressBar'
-
-function formatNumber(value) {
-  return Number(value).toLocaleString('fa-IR')
-}
 
 function BookCard({
   book,
