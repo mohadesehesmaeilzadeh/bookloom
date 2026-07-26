@@ -1,16 +1,145 @@
-# React + Vite
+# Bookloom
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Bookloom یک اپلیکیشن فارسی و راست‌به‌چپ برای مدیریت کتابخانه شخصی است. این پروژه با React و Vite ساخته شده و داده‌ها را به‌صورت محلی در مرورگر ذخیره می‌کند؛ بنابراین برای استفاده روزمره به سرور یا حساب کاربری نیاز ندارد.
 
-Currently, two official plugins are available:
+## امکانات
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- داشبورد با آمار واقعی کتاب‌ها، هدف مطالعه سالانه و پیشنهاد کتاب بعدی
+- مدیریت کامل کتاب‌ها: افزودن، ویرایش، مشاهده جزئیات و حذف
+- مسیرهای واقعی با React Router برای داشبورد، کتابخانه، مطالعه، لیست خرید، تمام‌شده‌ها، آمار و تنظیمات
+- وضعیت‌های مطالعه شامل خریداری‌شده، در حال مطالعه، متوقف‌شده، تمام‌شده، رهاشده و لیست خرید
+- گردش کار مطالعه: شروع، توقف موقت، ادامه، اتمام و رها کردن کتاب
+- پیگیری پیشرفت مطالعه با صفحه فعلی، تعداد کل صفحات، درصد مطالعه و تاریخ آخرین به‌روزرسانی
+- لیست خرید با اولویت، قیمت تقریبی، فروشگاه پیشنهادی و تبدیل کتاب به کتابخانه پس از خرید
+- جست‌وجو، فیلتر، مرتب‌سازی و حالت نمایش کارتی/فهرستی
+- یادداشت، نظر شخصی، امتیازدهی و نقل‌قول برای کتاب‌ها
+- پیشنهاد محلی کتاب بعدی بر اساس داده‌های کتابخانه
+- پشتیبان‌گیری و بازیابی JSON، ادغام داده‌ها و بازنشانی امن اطلاعات Bookloom
+- تنظیمات برنامه شامل تم روشن/تاریک/سیستمی، رنگ اصلی، صفحه شروع، اعداد فارسی و تایید حذف
+- طراحی واکنش‌گرا با چیدمان فارسی RTL
 
-## React Compiler
+## تکنولوژی‌ها
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React 19
+- React DOM
+- React Router
+- Vite
+- Oxlint
+- CSS معمولی با متغیرهای سراسری
+- LocalStorage برای ماندگاری داده‌ها
 
-## Expanding the Oxlint configuration
+## پیش‌نیازها
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+برای اجرای پروژه به Node.js و npm نیاز دارید.
+
+## نصب و اجرا
+
+```bash
+npm install
+npm run dev
+```
+
+بعد از اجرای دستور توسعه، آدرس محلی که Vite نمایش می‌دهد را در مرورگر باز کنید. معمولا آدرس مشابه زیر است:
+
+```text
+http://localhost:5173
+```
+
+## اسکریپت‌ها
+
+```bash
+npm run dev
+```
+
+اجرای نسخه توسعه با Vite.
+
+```bash
+npm run build
+```
+
+ساخت نسخه نهایی در پوشه `dist`.
+
+```bash
+npm run preview
+```
+
+پیش‌نمایش نسخه ساخته‌شده.
+
+```bash
+npm run lint
+```
+
+بررسی کد با Oxlint.
+
+## مسیرهای برنامه
+
+| مسیر | صفحه |
+| --- | --- |
+| `/` | داشبورد |
+| `/library` | کتابخانه من |
+| `/reading` | در حال مطالعه |
+| `/wishlist` | لیست خرید |
+| `/finished` | کتاب‌های تمام‌شده |
+| `/statistics` | آمار مطالعه |
+| `/settings` | تنظیمات |
+| `/books/:bookId` | جزئیات کتاب |
+
+## ساختار کلی پروژه
+
+```text
+src/
+  components/   کامپوننت‌های رابط کاربری
+  constants/    ثابت‌ها، مسیرها، وضعیت‌ها و گزینه‌های تنظیمات
+  context/      BooksContext، PreferencesContext و ToastContext
+  hooks/        هوک‌های مدیریت کتاب‌ها، اهداف مطالعه و کنترل فهرست‌ها
+  layouts/      چیدمان اصلی برنامه
+  pages/        صفحه‌های اصلی برنامه
+  styles/       استایل‌های سراسری
+  utils/        اعتبارسنجی، ذخیره‌سازی، فیلتر، مرتب‌سازی، بکاپ و فرمت‌دهی
+```
+
+## ذخیره‌سازی داده‌ها
+
+Bookloom داده‌ها را در LocalStorage مرورگر ذخیره می‌کند. کلیدهای اصلی برنامه عبارت‌اند از:
+
+- `bookloom_books`
+- `bookloom_reading_goals`
+- `bookloom_preferences`
+- `bookloom_collection_preferences` برای سازگاری با داده‌های قدیمی
+
+برای جلوگیری از از دست رفتن اطلاعات، از بخش تنظیمات می‌توانید فایل پشتیبان JSON دریافت کنید.
+
+## پشتیبان‌گیری و بازیابی
+
+بکاپ Bookloom شامل کتاب‌ها، اهداف مطالعه و تنظیمات برنامه است. بازیابی داده‌ها دو حالت دارد:
+
+- جایگزینی: داده‌های فعلی Bookloom با فایل پشتیبان جایگزین می‌شود.
+- ادغام: داده‌های فایل با داده‌های فعلی ترکیب می‌شود و در تعارض‌ها نسخه جدیدتر بر اساس `updatedAt` نگه داشته می‌شود.
+
+بازنشانی کامل اطلاعات نیاز به تایید متنی دارد و فقط کلیدهای مربوط به Bookloom را حذف می‌کند.
+
+## تنظیمات و شخصی‌سازی
+
+در صفحه تنظیمات می‌توانید موارد زیر را تغییر دهید:
+
+- تم روشن، تاریک یا مطابق سیستم
+- رنگ اصلی برنامه
+- صفحه شروع پیش‌فرض
+- نمایش اعداد با رقم‌های فارسی یا لاتین
+- فعال یا غیرفعال بودن تایید قبل از حذف
+- بازگرداندن تنظیمات به حالت پیش‌فرض
+
+## نکته‌های توسعه
+
+- وضعیت‌ها و اولویت‌های کتاب در فایل‌های ثابت مرکزی نگهداری می‌شوند.
+- منطق اعتبارسنجی و نرمال‌سازی داده‌ها در `src/utils` قرار دارد.
+- صفحات به‌صورت مستقیم به LocalStorage دسترسی ندارند و از لایه‌های ذخیره‌سازی و Context استفاده می‌کنند.
+- بکاپ‌های قدیمی‌تر با ساختار Phase 10 همچنان تا حد ممکن نرمال‌سازی و پشتیبانی می‌شوند.
+
+## وضعیت پروژه
+
+این پروژه یک اپلیکیشن محلی برای مدیریت کتابخانه شخصی است و هنوز قابلیت‌هایی مانند همگام‌سازی ابری، حساب کاربری، API خارجی، اپلیکیشن دسکتاپ یا تایمر مطالعه ندارد.
+
+## License
+
+فعلا لایسنسی برای این مخزن مشخص نشده است.
