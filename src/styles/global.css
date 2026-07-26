@@ -27,7 +27,8 @@
   --radius-md: 10px;
   --shadow-sm: 0 8px 24px rgba(31, 41, 51, 0.08);
   --font-family:
-    Tahoma, 'Vazirmatn', 'Segoe UI', Arial, system-ui, sans-serif;
+    'B Mitra', 'BMitra', 'B Lotus', 'BLotus', 'B Nazanin', 'BNazanin',
+    'Nazanin', 'Noto Naskh Arabic', 'Times New Roman', serif;
 
   font-family: var(--font-family);
   color: var(--color-text);
