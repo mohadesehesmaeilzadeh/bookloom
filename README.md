@@ -1,145 +1,147 @@
 # Bookloom
 
-Bookloom یک اپلیکیشن فارسی و راست‌به‌چپ برای مدیریت کتابخانه شخصی است. این پروژه با React و Vite ساخته شده و داده‌ها را به‌صورت محلی در مرورگر ذخیره می‌کند؛ بنابراین برای استفاده روزمره به سرور یا حساب کاربری نیاز ندارد.
+Bookloom is a Persian, right-to-left personal library manager built with React and Vite. It runs entirely in the browser and stores data locally, so it does not require a backend server or user account for everyday use.
 
-## امکانات
+## Features
 
-- داشبورد با آمار واقعی کتاب‌ها، هدف مطالعه سالانه و پیشنهاد کتاب بعدی
-- مدیریت کامل کتاب‌ها: افزودن، ویرایش، مشاهده جزئیات و حذف
-- مسیرهای واقعی با React Router برای داشبورد، کتابخانه، مطالعه، لیست خرید، تمام‌شده‌ها، آمار و تنظیمات
-- وضعیت‌های مطالعه شامل خریداری‌شده، در حال مطالعه، متوقف‌شده، تمام‌شده، رهاشده و لیست خرید
-- گردش کار مطالعه: شروع، توقف موقت، ادامه، اتمام و رها کردن کتاب
-- پیگیری پیشرفت مطالعه با صفحه فعلی، تعداد کل صفحات، درصد مطالعه و تاریخ آخرین به‌روزرسانی
-- لیست خرید با اولویت، قیمت تقریبی، فروشگاه پیشنهادی و تبدیل کتاب به کتابخانه پس از خرید
-- جست‌وجو، فیلتر، مرتب‌سازی و حالت نمایش کارتی/فهرستی
-- یادداشت، نظر شخصی، امتیازدهی و نقل‌قول برای کتاب‌ها
-- پیشنهاد محلی کتاب بعدی بر اساس داده‌های کتابخانه
-- پشتیبان‌گیری و بازیابی JSON، ادغام داده‌ها و بازنشانی امن اطلاعات Bookloom
-- تنظیمات برنامه شامل تم روشن/تاریک/سیستمی، رنگ اصلی، صفحه شروع، اعداد فارسی و تایید حذف
-- طراحی واکنش‌گرا با چیدمان فارسی RTL
+- Dashboard with real book counts, reading goals, reading statistics, and next-book recommendations
+- Full book CRUD: add, edit, view details, and delete books
+- React Router pages for dashboard, library, reading, wishlist, finished books, statistics, settings, and routed book details
+- Centralized book statuses: wishlist, owned, reading, paused, finished, and abandoned
+- Reading workflows: start, pause, resume, finish, and abandon books
+- Reading progress tracking with current page, total pages, percentage, remaining pages, and last progress update
+- Wishlist workflow with priority, estimated price, suggested store, and purchase conversion
+- Search, filtering, sorting, and grid/list view modes
+- Personal notes, reviews, ratings, and quotes
+- Local next-book recommendation logic
+- JSON backup, restore, merge, duplicate handling, and safe reset
+- Application settings for theme, accent color, default start page, digit display, and delete confirmation
+- Responsive RTL layout for Persian users
 
-## تکنولوژی‌ها
+## Tech Stack
 
 - React 19
 - React DOM
 - React Router
 - Vite
 - Oxlint
-- CSS معمولی با متغیرهای سراسری
-- LocalStorage برای ماندگاری داده‌ها
+- Plain CSS with global CSS variables
+- LocalStorage for persistence
 
-## پیش‌نیازها
+## Requirements
 
-برای اجرای پروژه به Node.js و npm نیاز دارید.
+You need Node.js and npm installed.
 
-## نصب و اجرا
+## Installation
 
 ```bash
 npm install
 npm run dev
 ```
 
-بعد از اجرای دستور توسعه، آدرس محلی که Vite نمایش می‌دهد را در مرورگر باز کنید. معمولا آدرس مشابه زیر است:
+After starting the development server, open the local URL printed by Vite. It is usually:
 
 ```text
 http://localhost:5173
 ```
 
-## اسکریپت‌ها
+## Scripts
 
 ```bash
 npm run dev
 ```
 
-اجرای نسخه توسعه با Vite.
+Start the Vite development server.
 
 ```bash
 npm run build
 ```
 
-ساخت نسخه نهایی در پوشه `dist`.
+Build the production version into `dist`.
 
 ```bash
 npm run preview
 ```
 
-پیش‌نمایش نسخه ساخته‌شده.
+Preview the production build locally.
 
 ```bash
 npm run lint
 ```
 
-بررسی کد با Oxlint.
+Run Oxlint.
 
-## مسیرهای برنامه
+## App Routes
 
-| مسیر | صفحه |
+| Route | Page |
 | --- | --- |
-| `/` | داشبورد |
-| `/library` | کتابخانه من |
-| `/reading` | در حال مطالعه |
-| `/wishlist` | لیست خرید |
-| `/finished` | کتاب‌های تمام‌شده |
-| `/statistics` | آمار مطالعه |
-| `/settings` | تنظیمات |
-| `/books/:bookId` | جزئیات کتاب |
+| `/` | Dashboard |
+| `/library` | My Library |
+| `/reading` | Currently Reading |
+| `/wishlist` | Wishlist |
+| `/finished` | Finished Books |
+| `/statistics` | Reading Statistics |
+| `/settings` | Settings |
+| `/books/:bookId` | Book Details |
 
-## ساختار کلی پروژه
+## Project Structure
 
 ```text
 src/
-  components/   کامپوننت‌های رابط کاربری
-  constants/    ثابت‌ها، مسیرها، وضعیت‌ها و گزینه‌های تنظیمات
-  context/      BooksContext، PreferencesContext و ToastContext
-  hooks/        هوک‌های مدیریت کتاب‌ها، اهداف مطالعه و کنترل فهرست‌ها
-  layouts/      چیدمان اصلی برنامه
-  pages/        صفحه‌های اصلی برنامه
-  styles/       استایل‌های سراسری
-  utils/        اعتبارسنجی، ذخیره‌سازی، فیلتر، مرتب‌سازی، بکاپ و فرمت‌دهی
+  components/   Reusable UI components
+  constants/    Routes, statuses, priorities, settings, and shared constants
+  context/      BooksContext, PreferencesContext, and ToastContext
+  hooks/        Book, goal, recommendation, and collection-control hooks
+  layouts/      Main application layout
+  pages/        Routed application pages
+  styles/       Global styles
+  utils/        Validation, persistence, backup, sorting, filtering, and formatting utilities
 ```
 
-## ذخیره‌سازی داده‌ها
+## Data Persistence
 
-Bookloom داده‌ها را در LocalStorage مرورگر ذخیره می‌کند. کلیدهای اصلی برنامه عبارت‌اند از:
+Bookloom stores data in the browser's LocalStorage. The main Bookloom-owned keys are:
 
 - `bookloom_books`
 - `bookloom_reading_goals`
 - `bookloom_preferences`
-- `bookloom_collection_preferences` برای سازگاری با داده‌های قدیمی
+- `bookloom_collection_preferences` for compatibility with older stored view-mode preferences
 
-برای جلوگیری از از دست رفتن اطلاعات، از بخش تنظیمات می‌توانید فایل پشتیبان JSON دریافت کنید.
+Use the Settings page to export a JSON backup before clearing browser data or moving to another device.
 
-## پشتیبان‌گیری و بازیابی
+## Backup and Restore
 
-بکاپ Bookloom شامل کتاب‌ها، اهداف مطالعه و تنظیمات برنامه است. بازیابی داده‌ها دو حالت دارد:
+Bookloom backups include books, reading goals, and application preferences.
 
-- جایگزینی: داده‌های فعلی Bookloom با فایل پشتیبان جایگزین می‌شود.
-- ادغام: داده‌های فایل با داده‌های فعلی ترکیب می‌شود و در تعارض‌ها نسخه جدیدتر بر اساس `updatedAt` نگه داشته می‌شود.
+Restore supports two modes:
 
-بازنشانی کامل اطلاعات نیاز به تایید متنی دارد و فقط کلیدهای مربوط به Bookloom را حذف می‌کند.
+- Replace: replace current Bookloom data with the selected backup.
+- Merge: combine the backup with current data and keep the newest duplicate book record based on `updatedAt`.
 
-## تنظیمات و شخصی‌سازی
+The full data reset flow requires typed confirmation and removes only Bookloom-owned storage keys.
 
-در صفحه تنظیمات می‌توانید موارد زیر را تغییر دهید:
+## Settings and Personalization
 
-- تم روشن، تاریک یا مطابق سیستم
-- رنگ اصلی برنامه
-- صفحه شروع پیش‌فرض
-- نمایش اعداد با رقم‌های فارسی یا لاتین
-- فعال یا غیرفعال بودن تایید قبل از حذف
-- بازگرداندن تنظیمات به حالت پیش‌فرض
+The Settings page supports:
 
-## نکته‌های توسعه
+- Light, dark, and system themes
+- Accent color selection
+- Default start page
+- Persian or Latin digit display
+- Delete-confirmation preference
+- Resetting preferences without deleting books
 
-- وضعیت‌ها و اولویت‌های کتاب در فایل‌های ثابت مرکزی نگهداری می‌شوند.
-- منطق اعتبارسنجی و نرمال‌سازی داده‌ها در `src/utils` قرار دارد.
-- صفحات به‌صورت مستقیم به LocalStorage دسترسی ندارند و از لایه‌های ذخیره‌سازی و Context استفاده می‌کنند.
-- بکاپ‌های قدیمی‌تر با ساختار Phase 10 همچنان تا حد ممکن نرمال‌سازی و پشتیبانی می‌شوند.
+## Development Notes
 
-## وضعیت پروژه
+- Book statuses and priorities are centralized in `src/constants`.
+- Data validation and normalization live in `src/utils`.
+- Pages do not access LocalStorage directly; persistence goes through storage utilities and React context.
+- Older Phase 10 backup files are normalized and migrated where possible.
 
-این پروژه یک اپلیکیشن محلی برای مدیریت کتابخانه شخصی است و هنوز قابلیت‌هایی مانند همگام‌سازی ابری، حساب کاربری، API خارجی، اپلیکیشن دسکتاپ یا تایمر مطالعه ندارد.
+## Current Limitations
+
+Bookloom is a local-first browser app. It does not currently include cloud sync, authentication, external book APIs, Electron packaging, desktop file access, or reading timers.
 
 ## License
 
-فعلا لایسنسی برای این مخزن مشخص نشده است.
+No license has been specified yet.
