@@ -1,14 +1,17 @@
 import { formatNumber } from '../../utils/formatNumber'
+import { usePreferences } from '../../context/usePreferences'
 
 function MonthlyFinishedSummary({ months }) {
+  const { language, t } = usePreferences()
   const maxCount = Math.max(...months.map((month) => month.count), 0)
+  const monthFormatter = new Intl.DateTimeFormat(language.locale, { month: 'long' })
 
   return (
     <section className="dashboard-section" aria-labelledby="monthly-summary-title">
       <div className="library-header">
         <div>
-          <h2 id="monthly-summary-title">کتاب‌های تمام‌شده در ماه‌های امسال</h2>
-          <p>محاسبه بر اساس تاریخ پایان مطالعه و ماه‌های تقویم میلادی ذخیره‌شده انجام می‌شود.</p>
+          <h2 id="monthly-summary-title">{t('dashboard.monthly.title')}</h2>
+          <p>{t('dashboard.monthly.description')}</p>
         </div>
       </div>
 
@@ -18,11 +21,11 @@ function MonthlyFinishedSummary({ months }) {
 
           return (
             <div className="monthly-row" key={month.month}>
-              <span>{month.label}</span>
+              <span>{monthFormatter.format(new Date(2024, month.month - 1, 1))}</span>
               <div className="monthly-bar" aria-hidden="true">
                 <span style={{ width: `${width}%` }} />
               </div>
-              <strong>{formatNumber(month.count)} کتاب</strong>
+              <strong>{t('dashboard.bookCount', { count: formatNumber(month.count) })}</strong>
             </div>
           )
         })}

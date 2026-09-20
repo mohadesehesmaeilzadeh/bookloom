@@ -1,16 +1,18 @@
 import { Link } from 'react-router-dom'
 import { getBookPriorityLabel } from '../../constants/bookPriorities'
 import { getBookDetailsPath } from '../../constants/routes'
+import { usePreferences } from '../../context/usePreferences'
 import { formatDateTime } from '../../utils/dateUtils'
 import { formatPrice } from '../../utils/formatPrice'
 
 function WishlistBookCard({ book, layout = 'grid', onDelete, onEdit, onPurchase }) {
+  const { language, t } = usePreferences()
   const details = [
-    book.author ? `نویسنده: ${book.author}` : '',
-    book.category ? `دسته‌بندی: ${book.category}` : '',
-    book.expectedPrice > 0 ? `قیمت تقریبی: ${formatPrice(book.expectedPrice)}` : '',
-    book.purchaseStore ? `فروشگاه پیشنهادی: ${book.purchaseStore}` : '',
-    book.createdAt ? `افزوده‌شده: ${formatDateTime(book.createdAt)}` : '',
+    book.author ? t('wishlist.detail.author', { value: book.author }) : '',
+    book.category ? t('wishlist.detail.category', { value: book.category }) : '',
+    book.expectedPrice > 0 ? t('wishlist.detail.price', { value: formatPrice(book.expectedPrice) }) : '',
+    book.purchaseStore ? t('wishlist.detail.store', { value: book.purchaseStore }) : '',
+    book.createdAt ? t('wishlist.detail.added', { value: formatDateTime(book.createdAt) }) : '',
   ].filter(Boolean)
 
   return (
@@ -18,9 +20,9 @@ function WishlistBookCard({ book, layout = 'grid', onDelete, onEdit, onPurchase 
       <div className="book-card-header">
         <div>
           <h3>{book.title}</h3>
-          <p>لیست خرید</p>
+          <p>{t('wishlist.title')}</p>
         </div>
-        <span className="book-priority">{getBookPriorityLabel(book.priority)}</span>
+        <span className="book-priority">{getBookPriorityLabel(book.priority, language.value)}</span>
       </div>
 
       {details.length > 0 ? (
@@ -39,16 +41,16 @@ function WishlistBookCard({ book, layout = 'grid', onDelete, onEdit, onPurchase 
           type="button"
           onClick={() => onPurchase(book)}
         >
-          خریدمش
+          {t('wishlist.purchasedButton')}
         </button>
         <Link className="button button-ghost" to={getBookDetailsPath(book.id)}>
-          مشاهده
+          {t('common.view')}
         </Link>
         <button className="button button-secondary" type="button" onClick={() => onEdit(book)}>
-          ویرایش
+          {t('common.edit')}
         </button>
         <button className="button button-danger-soft" type="button" onClick={() => onDelete(book)}>
-          حذف
+          {t('common.delete')}
         </button>
       </div>
     </article>

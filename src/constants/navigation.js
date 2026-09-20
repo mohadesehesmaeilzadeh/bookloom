@@ -1,39 +1,47 @@
 import { ROUTES } from './routes'
+import { t } from '../i18n/localization'
 
 export const navigationItems = [
   {
     id: 'dashboard',
-    label: 'داشبورد',
+    labelKey: 'nav.dashboard',
     path: ROUTES.DASHBOARD,
   },
   {
     id: 'library',
-    label: 'کتابخانه من',
+    labelKey: 'nav.library',
     path: ROUTES.LIBRARY,
   },
   {
     id: 'reading',
-    label: 'در حال مطالعه',
+    labelKey: 'nav.reading',
     path: ROUTES.READING,
   },
   {
     id: 'wishlist',
-    label: 'لیست خرید',
+    labelKey: 'nav.wishlist',
     path: ROUTES.WISHLIST,
   },
   {
     id: 'finished',
-    label: 'تمام‌شده‌ها',
+    labelKey: 'nav.finished',
     path: ROUTES.FINISHED,
   },
   {
     id: 'statistics',
-    label: 'آمار مطالعه',
+    labelKey: 'nav.statistics',
     path: ROUTES.STATISTICS,
   },
   {
     id: 'settings',
-    label: 'تنظیمات',
+    labelKey: 'nav.settings',
     path: ROUTES.SETTINGS,
   },
 ]
+
+export function getNavigationItems(language) {
+  return navigationItems.map((item) => ({
+    ...item,
+    label: t(item.labelKey, undefined, language),
+  }))
+}

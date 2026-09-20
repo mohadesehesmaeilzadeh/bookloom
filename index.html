@@ -11,6 +11,7 @@
       ;(() => {
         try {
           const defaults = {
+            language: 'fa',
             theme: 'system',
             accentColor: 'indigo',
             usePersianDigits: true,
@@ -25,6 +26,9 @@
           )
             ? preferences.accentColor
             : defaults.accentColor
+          const language = ['fa', 'en'].includes(preferences.language)
+            ? preferences.language
+            : defaults.language
           const resolvedTheme =
             theme === 'system'
               ? window.matchMedia?.('(prefers-color-scheme: dark)').matches
@@ -34,12 +38,18 @@
 
           document.documentElement.dataset.theme = resolvedTheme
           document.documentElement.dataset.accent = accent
+          document.documentElement.dataset.language = language
           document.documentElement.dataset.persianDigits =
             preferences.usePersianDigits === false ? 'false' : 'true'
+          document.documentElement.lang = language
+          document.documentElement.dir = language === 'en' ? 'ltr' : 'rtl'
         } catch {
           document.documentElement.dataset.theme = 'light'
           document.documentElement.dataset.accent = 'indigo'
+          document.documentElement.dataset.language = 'fa'
           document.documentElement.dataset.persianDigits = 'true'
+          document.documentElement.lang = 'fa'
+          document.documentElement.dir = 'rtl'
         }
       })()
     </script>

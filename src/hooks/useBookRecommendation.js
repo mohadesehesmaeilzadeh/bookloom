@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { DEFAULT_RECOMMENDATION_MODE, RECOMMENDATION_MODE } from '../constants/recommendationModes'
 import { useBooksContext } from '../context/useBooksContext'
+import { usePreferences } from '../context/usePreferences'
 import {
   getEligibleRecommendationBooks,
   getRecommendationCategories,
@@ -10,6 +11,7 @@ import {
 
 export function useBookRecommendation() {
   const { books } = useBooksContext()
+  const { language, t } = usePreferences()
   const [mode, setMode] = useState(DEFAULT_RECOMMENDATION_MODE)
   const [selectedCategory, setSelectedCategory] = useState('')
   const [recommendation, setRecommendation] = useState(null)
@@ -22,6 +24,7 @@ export function useBookRecommendation() {
     const nextRecommendation = getRecommendationForMode(eligibleBooks, {
       mode,
       selectedCategory,
+      language: language.value,
     })
 
     setRecommendation(nextRecommendation)
@@ -35,6 +38,7 @@ export function useBookRecommendation() {
     if (mode === RECOMMENDATION_MODE.WEIGHTED) {
       const rankedRecommendations = getWeightedRecommendations(eligibleBooks, {
         selectedCategory,
+        language: language.value,
       })
 
       if (rankedRecommendations.length === 0) {
@@ -56,6 +60,7 @@ export function useBookRecommendation() {
       mode,
       previousBookId,
       selectedCategory,
+      language: language.value,
     })
 
     const stableRecommendation =
@@ -66,7 +71,7 @@ export function useBookRecommendation() {
             ...nextRecommendation,
             reasons: [
               ...nextRecommendation.reasons,
-              'در این روش همان کتاب همچنان بهترین تطبیق است.',
+              t('recommendation.reason.sameBest'),
             ],
           }
         : nextRecommendation

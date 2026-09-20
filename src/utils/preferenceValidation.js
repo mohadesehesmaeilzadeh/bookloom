@@ -3,6 +3,7 @@ import { DEFAULT_PREFERENCES, preferenceKeys } from '../constants/defaultPrefere
 import { startPageValues } from '../constants/startPageOptions'
 import { themeValues } from '../constants/themeOptions'
 import { viewModeValues } from '../constants/viewModes'
+import { isValidLanguage } from '../i18n/localization'
 
 const preferenceKeySet = new Set(preferenceKeys)
 const dangerousKeys = new Set(['__proto__', 'constructor', 'prototype'])
@@ -59,6 +60,12 @@ export function normalizePreferences(value, options = {}) {
   const fallback = options.fillDefaults === false ? {} : DEFAULT_PREFERENCES
   const source = sanitizePreferenceRecord(value)
   const normalized = { ...fallback }
+
+  if ('language' in source) {
+    normalized.language = isValidLanguage(source.language)
+      ? source.language
+      : DEFAULT_PREFERENCES.language
+  }
 
   if ('theme' in source) {
     normalized.theme = isValidTheme(source.theme) ? source.theme : DEFAULT_PREFERENCES.theme

@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { getEligibleRecommendationBooks } from '../../utils/bookRecommendations'
 import { useBooksContext } from '../../context/useBooksContext'
+import { usePreferences } from '../../context/usePreferences'
 import RecommendationModal from './RecommendationModal'
 
 function RecommendationButton({ onFeedback }) {
   const { books } = useBooksContext()
+  const { t } = usePreferences()
   const [isOpen, setIsOpen] = useState(false)
   const eligibleCount = getEligibleRecommendationBooks(books).length
 
@@ -16,7 +18,7 @@ function RecommendationButton({ onFeedback }) {
         type="button"
         onClick={() => setIsOpen(true)}
       >
-        پیشنهاد کتاب بعدی
+        {t('recommendation.button')}
       </button>
       <RecommendationModal
         isOpen={isOpen}

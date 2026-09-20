@@ -1,4 +1,5 @@
 import { BOOK_STATUS } from './bookStatuses'
+import { t } from '../i18n/localization'
 
 export const BOOK_STATUS_ACTION = {
   START_READING: 'start-reading',
@@ -14,78 +15,75 @@ export const bookStatusTransitions = {
   [BOOK_STATUS.OWNED]: [
     {
       action: BOOK_STATUS_ACTION.START_READING,
-      label: 'شروع مطالعه',
+      labelKey: 'statusAction.start-reading.label',
       targetStatus: BOOK_STATUS.READING,
       requiresConfirmation: false,
       cardAction: true,
     },
     {
       action: BOOK_STATUS_ACTION.ABANDON_BOOK,
-      label: 'رها کردن کتاب',
+      labelKey: 'statusAction.abandon-book.label',
       targetStatus: BOOK_STATUS.ABANDONED,
       requiresConfirmation: true,
-      confirmationTitle: 'رها کردن کتاب',
-      confirmationMessage:
-        'آیا مطمئن هستید که می‌خواهید این کتاب را رهاشده علامت بزنید؟',
+      confirmationTitleKey: 'statusAction.abandon-book.title',
+      confirmationMessageKey: 'statusAction.abandon-book.message',
     },
   ],
   [BOOK_STATUS.READING]: [
     {
       action: BOOK_STATUS_ACTION.PAUSE_READING,
-      label: 'توقف موقت',
+      labelKey: 'statusAction.pause-reading.label',
       targetStatus: BOOK_STATUS.PAUSED,
       requiresConfirmation: false,
       cardAction: true,
     },
     {
       action: BOOK_STATUS_ACTION.FINISH_READING,
-      label: 'تمام شد',
+      labelKey: 'statusAction.finish-reading.label',
       targetStatus: BOOK_STATUS.FINISHED,
       requiresConfirmation: true,
-      confirmationTitle: 'تمام شدن مطالعه',
-      confirmationMessage: 'آیا مطالعه این کتاب تمام شده است؟',
+      confirmationTitleKey: 'statusAction.finish-reading.title',
+      confirmationMessageKey: 'statusAction.finish-reading.message',
     },
     {
       action: BOOK_STATUS_ACTION.ABANDON_BOOK,
-      label: 'رها کردن کتاب',
+      labelKey: 'statusAction.abandon-book.label',
       targetStatus: BOOK_STATUS.ABANDONED,
       requiresConfirmation: true,
-      confirmationTitle: 'رها کردن کتاب',
-      confirmationMessage:
-        'آیا مطمئن هستید که می‌خواهید این کتاب را رهاشده علامت بزنید؟',
+      confirmationTitleKey: 'statusAction.abandon-book.title',
+      confirmationMessageKey: 'statusAction.abandon-book.message',
     },
   ],
   [BOOK_STATUS.PAUSED]: [
     {
       action: BOOK_STATUS_ACTION.RESUME_READING,
-      label: 'ادامه مطالعه',
+      labelKey: 'statusAction.resume-reading.label',
       targetStatus: BOOK_STATUS.READING,
       requiresConfirmation: false,
       cardAction: true,
     },
     {
       action: BOOK_STATUS_ACTION.FINISH_READING,
-      label: 'تمام شد',
+      labelKey: 'statusAction.finish-reading.label',
       targetStatus: BOOK_STATUS.FINISHED,
       requiresConfirmation: true,
-      confirmationTitle: 'تمام شدن مطالعه',
-      confirmationMessage: 'آیا مطالعه این کتاب تمام شده است؟',
+      confirmationTitleKey: 'statusAction.finish-reading.title',
+      confirmationMessageKey: 'statusAction.finish-reading.message',
     },
     {
       action: BOOK_STATUS_ACTION.ABANDON_BOOK,
-      label: 'رها کردن کتاب',
+      labelKey: 'statusAction.abandon-book.label',
       targetStatus: BOOK_STATUS.ABANDONED,
       requiresConfirmation: true,
-      confirmationTitle: 'رها کردن کتاب',
-      confirmationMessage:
-        'آیا مطمئن هستید که می‌خواهید این کتاب را رهاشده علامت بزنید؟',
+      confirmationTitleKey: 'statusAction.abandon-book.title',
+      confirmationMessageKey: 'statusAction.abandon-book.message',
     },
   ],
   [BOOK_STATUS.FINISHED]: [],
   [BOOK_STATUS.ABANDONED]: [
     {
       action: BOOK_STATUS_ACTION.RETURN_TO_LIBRARY,
-      label: 'بازگرداندن به کتابخانه',
+      labelKey: 'statusAction.return-to-library.label',
       targetStatus: BOOK_STATUS.OWNED,
       requiresConfirmation: false,
     },
@@ -96,6 +94,33 @@ export function getStatusTransitions(status) {
   return bookStatusTransitions[status] ?? []
 }
 
+export function localizeStatusTransition(transition, language) {
+  if (!transition) {
+    return null
+  }
+
+  return {
+    ...transition,
+    confirmationMessage: transition.confirmationMessageKey
+      ? t(transition.confirmationMessageKey, undefined, language)
+      : undefined,
+    confirmationTitle: transition.confirmationTitleKey
+      ? t(transition.confirmationTitleKey, undefined, language)
+      : undefined,
+    label: t(transition.labelKey, undefined, language),
+  }
+}
+
+export function getLocalizedStatusTransitions(status, language) {
+  return getStatusTransitions(status).map((transition) =>
+    localizeStatusTransition(transition, language),
+  )
+}
+
 export function getCardStatusTransition(status) {
   return getStatusTransitions(status).find((transition) => transition.cardAction) ?? null
+}
+
+export function getLocalizedCardStatusTransition(status, language) {
+  return localizeStatusTransition(getCardStatusTransition(status), language)
 }

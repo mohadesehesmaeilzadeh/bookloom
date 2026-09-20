@@ -1,7 +1,9 @@
 import Modal from '../common/Modal'
+import { usePreferences } from '../../context/usePreferences'
 import BookForm from './BookForm'
 
 function BookFormModal({ book, isOpen, mode, onClose, onSubmit, variant = 'default' }) {
+  const { t } = usePreferences()
   const isEditing = mode === 'edit'
   const isWishlistVariant = variant === 'wishlist'
 
@@ -10,10 +12,10 @@ function BookFormModal({ book, isOpen, mode, onClose, onSubmit, variant = 'defau
       isOpen={isOpen}
       title={
         isEditing
-          ? 'ویرایش کتاب'
+          ? t('books.editBook')
           : isWishlistVariant
-            ? 'افزودن به لیست خرید'
-            : 'افزودن کتاب'
+            ? t('books.addToWishlist')
+            : t('books.addBook')
       }
       onClose={onClose}
     >
@@ -21,10 +23,10 @@ function BookFormModal({ book, isOpen, mode, onClose, onSubmit, variant = 'defau
         book={isEditing ? book : null}
         submitLabel={
           isEditing
-            ? 'ذخیره تغییرات'
+            ? t('common.saveChanges')
             : isWishlistVariant
-              ? 'افزودن به لیست خرید'
-              : 'افزودن کتاب'
+              ? t('books.addToWishlist')
+              : t('books.addBook')
         }
         variant={variant}
         onCancel={onClose}

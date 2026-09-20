@@ -1,3 +1,5 @@
+import { t } from '../i18n/localization'
+
 export const RECOMMENDATION_MODE = {
   RANDOM: 'random',
   HIGHEST_PRIORITY: 'highestPriority',
@@ -12,37 +14,50 @@ export const DEFAULT_RECOMMENDATION_MODE = RECOMMENDATION_MODE.WEIGHTED
 export const recommendationModes = [
   {
     value: RECOMMENDATION_MODE.WEIGHTED,
-    label: 'پیشنهاد ترکیبی',
-    description:
-      'اولویت، مدت حضور در کتابخانه، کوتاه بودن کتاب، دسته‌بندی دلخواه و وضعیت توقف را با هم می‌سنجد.',
+    labelKey: 'recommendation.mode.weighted.label',
+    descriptionKey: 'recommendation.mode.weighted.description',
   },
   {
     value: RECOMMENDATION_MODE.RANDOM,
-    label: 'انتخاب تصادفی',
-    description: 'از میان کتاب‌های قابل پیشنهاد یک گزینه را بدون امتیازدهی انتخاب می‌کند.',
+    labelKey: 'recommendation.mode.random.label',
+    descriptionKey: 'recommendation.mode.random.description',
   },
   {
     value: RECOMMENDATION_MODE.HIGHEST_PRIORITY,
-    label: 'بیشترین اولویت',
-    description: 'کتابی را پیشنهاد می‌دهد که اولویت بالاتری در کتابخانه دارد.',
+    labelKey: 'recommendation.mode.highestPriority.label',
+    descriptionKey: 'recommendation.mode.highestPriority.description',
   },
   {
     value: RECOMMENDATION_MODE.OLDEST_PURCHASE,
-    label: 'قدیمی‌ترین خرید',
-    description: 'کتابی را پیشنهاد می‌دهد که مدت بیشتری در کتابخانه مانده است.',
+    labelKey: 'recommendation.mode.oldestPurchase.label',
+    descriptionKey: 'recommendation.mode.oldestPurchase.description',
   },
   {
     value: RECOMMENDATION_MODE.SHORTEST_BOOK,
-    label: 'کوتاه‌ترین کتاب',
-    description: 'از میان کتاب‌هایی با تعداد صفحه مشخص، کوتاه‌ترین گزینه را انتخاب می‌کند.',
+    labelKey: 'recommendation.mode.shortestBook.label',
+    descriptionKey: 'recommendation.mode.shortestBook.description',
   },
   {
     value: RECOMMENDATION_MODE.SELECTED_CATEGORY,
-    label: 'براساس دسته‌بندی',
-    description: 'از دسته‌بندی انتخاب‌شده، یک کتاب قابل مطالعه پیشنهاد می‌دهد.',
+    labelKey: 'recommendation.mode.selectedCategory.label',
+    descriptionKey: 'recommendation.mode.selectedCategory.description',
   },
 ]
 
 export const recommendationModeByValue = Object.fromEntries(
   recommendationModes.map((mode) => [mode.value, mode]),
 )
+
+export function getRecommendationModes(language) {
+  return recommendationModes.map((mode) => ({
+    ...mode,
+    description: t(mode.descriptionKey, undefined, language),
+    label: t(mode.labelKey, undefined, language),
+  }))
+}
+
+export function getRecommendationModeByValue(language) {
+  return Object.fromEntries(
+    getRecommendationModes(language).map((mode) => [mode.value, mode]),
+  )
+}

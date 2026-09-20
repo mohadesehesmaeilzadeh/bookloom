@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { bookPriorities } from '../../constants/bookPriorities'
-import { BOOK_STATUS, bookStatuses } from '../../constants/bookStatuses'
+import { getBookPriorities } from '../../constants/bookPriorities'
+import { BOOK_STATUS, getBookStatuses } from '../../constants/bookStatuses'
+import { usePreferences } from '../../context/usePreferences'
 import {
   createBookFormPayload,
   getInitialBookFormValues,
@@ -8,24 +9,27 @@ import {
   validateBookForm,
 } from '../../utils/validateBookForm'
 
-const fieldLabels = {
-  title: 'نام کتاب',
-  author: 'نویسنده',
-  translator: 'مترجم',
-  publisher: 'انتشارات',
-  category: 'دسته‌بندی',
-  status: 'وضعیت',
-  purchaseDate: 'تاریخ خرید',
-  totalPages: 'تعداد صفحات',
-  price: 'قیمت خرید',
-  expectedPrice: 'قیمت تقریبی',
-  purchaseStore: 'فروشگاه',
-  priority: 'اولویت',
-  notes: 'یادداشت',
+const fieldLabelKeys = {
+  title: 'bookFields.title',
+  author: 'bookFields.author',
+  translator: 'bookFields.translator',
+  publisher: 'bookFields.publisher',
+  category: 'bookFields.category',
+  status: 'bookFields.status',
+  purchaseDate: 'bookFields.purchaseDate',
+  totalPages: 'bookFields.totalPages',
+  price: 'bookFields.price',
+  expectedPrice: 'bookFields.expectedPrice',
+  purchaseStore: 'bookFields.purchaseStore',
+  priority: 'bookFields.priority',
+  notes: 'bookFields.notes',
 }
 
 function BookForm({ book, onCancel, onSubmit, submitLabel, variant = 'default' }) {
+  const { language, t } = usePreferences()
   const isWishlistVariant = variant === 'wishlist'
+  const bookPriorities = getBookPriorities(language.value)
+  const bookStatuses = getBookStatuses(language.value)
   const [values, setValues] = useState(() => getInitialBookFormValues(book))
   const [errors, setErrors] = useState({})
   const [wasSubmitted, setWasSubmitted] = useState(false)
@@ -45,7 +49,7 @@ function BookForm({ book, onCancel, onSubmit, submitLabel, variant = 'default' }
     setValues(nextValues)
 
     if (wasSubmitted || errors[field]) {
-      setErrors(validateBookForm(nextValues))
+      setErrors(validateBookForm(nextValues, language.value))
     }
   }
 
@@ -65,7 +69,7 @@ function BookForm({ book, onCancel, onSubmit, submitLabel, variant = 'default' }
     event.preventDefault()
     setWasSubmitted(true)
 
-    const nextErrors = validateBookForm(values)
+    const nextErrors = validateBookForm(values, language.value)
     setErrors(nextErrors)
 
     if (hasBookFormErrors(nextErrors)) {
@@ -87,7 +91,7 @@ function BookForm({ book, onCancel, onSubmit, submitLabel, variant = 'default' }
     <form className="book-form" noValidate onSubmit={handleSubmit}>
       <div className="form-grid">
         <label className="form-field form-field-wide">
-          <span>{fieldLabels.title}</span>
+          <span>{t(fieldLabelKeys.title)}</span>
           <input
             aria-describedby={errors.title ? 'title-error' : undefined}
             aria-invalid={errors.title ? 'true' : 'false'}
@@ -110,7 +114,7 @@ function BookForm({ book, onCancel, onSubmit, submitLabel, variant = 'default' }
 
         {isWishlistVariant ? null : (
           <label className="form-field">
-            <span>{fieldLabels.status}</span>
+          <span>{t(fieldLabelKeys.status)}</span>
             <select
               aria-describedby={errors.status ? 'status-error' : undefined}
               aria-invalid={errors.status ? 'true' : 'false'}
@@ -128,7 +132,7 @@ function BookForm({ book, onCancel, onSubmit, submitLabel, variant = 'default' }
         )}
 
         <label className="form-field">
-          <span>{fieldLabels.priority}</span>
+          <span>{t(fieldLabelKeys.priority)}</span>
           <select
             aria-describedby={errors.priority ? 'priority-error' : undefined}
             aria-invalid={errors.priority ? 'true' : 'false'}
@@ -147,7 +151,7 @@ function BookForm({ book, onCancel, onSubmit, submitLabel, variant = 'default' }
         {isWishlistVariant ? null : (
           <>
             <label className="form-field">
-              <span>{fieldLabels.purchaseDate}</span>
+              <span>{t(fieldLabelKeys.purchaseDate)}</span>
               <input
                 type="date"
                 value={values.purchaseDate}
@@ -178,13 +182,13 @@ function BookForm({ book, onCancel, onSubmit, submitLabel, variant = 'default' }
         />
         <TextField
           field="purchaseStore"
-          label={isWishlistVariant ? 'فروشگاه پیشنهادی' : fieldLabels.purchaseStore}
+          label={isWishlistVariant ? t('bookFields.suggestedStore') : t(fieldLabelKeys.purchaseStore)}
           value={values.purchaseStore}
           onChange={updateField}
         />
 
         <label className="form-field form-field-wide">
-          <span>{fieldLabels.notes}</span>
+          <span>{t(fieldLabelKeys.notes)}</span>
           <textarea
             rows="4"
             value={values.notes}
@@ -195,7 +199,7 @@ function BookForm({ book, onCancel, onSubmit, submitLabel, variant = 'default' }
 
       <div className="form-actions">
         <button className="button button-secondary" type="button" onClick={onCancel}>
-          انصراف
+          {t('common.cancel')}
         </button>
         <button className="button button-primary" type="submit">
           {submitLabel}
@@ -206,9 +210,11 @@ function BookForm({ book, onCancel, onSubmit, submitLabel, variant = 'default' }
 }
 
 function TextField({ field, label, onChange, value }) {
+  const { t } = usePreferences()
+
   return (
     <label className="form-field">
-      <span>{label ?? fieldLabels[field]}</span>
+      <span>{label ?? t(fieldLabelKeys[field])}</span>
       <input
         type="text"
         value={value}
@@ -219,9 +225,11 @@ function TextField({ field, label, onChange, value }) {
 }
 
 function NumberField({ error, field, onChange, step = 'any', value }) {
+  const { t } = usePreferences()
+
   return (
     <label className="form-field">
-      <span>{fieldLabels[field]}</span>
+      <span>{t(fieldLabelKeys[field])}</span>
       <input
         aria-describedby={error ? `${field}-error` : undefined}
         aria-invalid={error ? 'true' : 'false'}

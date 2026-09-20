@@ -1,3 +1,9 @@
+import { LANGUAGE, getDocumentLanguage } from '../i18n/localization'
+
+function getDateLocale(options = {}) {
+  return (options.language ?? getDocumentLanguage()) === LANGUAGE.EN ? 'en-US' : 'fa-IR'
+}
+
 export function getTodayDateString() {
   const today = new Date()
   const year = today.getFullYear()
@@ -7,7 +13,7 @@ export function getTodayDateString() {
   return `${year}-${month}-${day}`
 }
 
-export function formatDateTime(value) {
+export function formatDateTime(value, options = {}) {
   if (!value) {
     return ''
   }
@@ -18,13 +24,13 @@ export function formatDateTime(value) {
     return value
   }
 
-  return new Intl.DateTimeFormat('fa-IR', {
+  return new Intl.DateTimeFormat(getDateLocale(options), {
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(date)
 }
 
-export function formatDate(value) {
+export function formatDate(value, options = {}) {
   if (!value) {
     return ''
   }
@@ -43,7 +49,7 @@ export function formatDate(value) {
     return value
   }
 
-  return new Intl.DateTimeFormat('fa-IR', {
+  return new Intl.DateTimeFormat(getDateLocale(options), {
     dateStyle: 'medium',
   }).format(date)
 }

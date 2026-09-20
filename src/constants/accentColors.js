@@ -1,3 +1,5 @@
+import { t } from '../i18n/localization'
+
 export const ACCENT_COLOR = {
   INDIGO: 'indigo',
   EMERALD: 'emerald',
@@ -9,29 +11,36 @@ export const ACCENT_COLOR = {
 export const accentColorOptions = [
   {
     value: ACCENT_COLOR.INDIGO,
-    label: 'نیلی',
+    labelKey: 'accent.indigo',
     cssValue: '#4f5d95',
   },
   {
     value: ACCENT_COLOR.EMERALD,
-    label: 'سبز زمردی',
+    labelKey: 'accent.emerald',
     cssValue: '#2f6f5e',
   },
   {
     value: ACCENT_COLOR.ROSE,
-    label: 'صورتی ملایم',
+    labelKey: 'accent.rose',
     cssValue: '#9f4d67',
   },
   {
     value: ACCENT_COLOR.AMBER,
-    label: 'کهربایی',
+    labelKey: 'accent.amber',
     cssValue: '#996515',
   },
   {
     value: ACCENT_COLOR.SLATE,
-    label: 'خاکستری',
+    labelKey: 'accent.slate',
     cssValue: '#526173',
   },
 ]
 
 export const accentColorValues = accentColorOptions.map((color) => color.value)
+
+export function getAccentColorOptions(language) {
+  return accentColorOptions.map((accentColor) => ({
+    ...accentColor,
+    label: t(accentColor.labelKey, undefined, language),
+  }))
+}

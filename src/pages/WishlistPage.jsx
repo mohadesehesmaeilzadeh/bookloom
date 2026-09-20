@@ -17,14 +17,14 @@ import { getWishlistBooks } from '../utils/bookSelectors'
 import { createPurchaseConversionPayload } from '../utils/wishlist/purchaseConversion'
 import {
   WISHLIST_SORT,
+  getWishlistSortOptions,
   sortWishlistBooks,
-  wishlistSortOptions,
 } from '../utils/wishlist/wishlistSorting'
 import { getWishlistSummary } from '../utils/wishlist/wishlistSummary'
 
 function WishlistPage() {
   const { addBook, books, deleteBook, updateBook } = useBooksContext()
-  const { preferences } = usePreferences()
+  const { language, preferences, t } = usePreferences()
   const [formState, setFormState] = useState({ book: null, mode: null })
   const [deleteCandidate, setDeleteCandidate] = useState(null)
   const [purchaseCandidate, setPurchaseCandidate] = useState(null)
@@ -64,11 +64,11 @@ function WishlistPage() {
       const result = updateBook(formState.book.id, wishlistPayload)
 
       if (result.success) {
-        setFeedback('تغییرات لیست خرید ذخیره شد.')
+        setFeedback(t('wishlist.changesSaved'))
       }
     } else {
       addBook(wishlistPayload)
-      setFeedback('کتاب به لیست خرید اضافه شد.')
+      setFeedback(t('wishlist.added'))
     }
 
     closeForm()
@@ -84,7 +84,7 @@ function WishlistPage() {
     setIsDeleting(false)
 
     if (result.success) {
-      setFeedback('کتاب حذف شد.')
+      setFeedback(t('books.bookDeleted'))
       setDeleteCandidate(null)
     }
   }
@@ -98,7 +98,7 @@ function WishlistPage() {
     const result = deleteBook(book.id)
 
     if (result.success) {
-      setFeedback('کتاب حذف شد.')
+      setFeedback(t('books.bookDeleted'))
     }
   }
 
@@ -113,26 +113,26 @@ function WishlistPage() {
     )
 
     if (result.success) {
-      setFeedback('کتاب با موفقیت به کتابخانه اضافه شد.')
+      setFeedback(t('wishlist.purchased'))
       setPurchaseCandidate(null)
     }
   }
 
   const summaryCards = [
     {
-      label: 'تعداد کتاب‌های لیست خرید',
+      label: t('wishlist.summary.count'),
       value: formatNumber(summary.totalCount),
     },
     {
-      label: 'مجموع قیمت تقریبی',
-      value: formatPrice(summary.estimatedTotalPrice) || '۰ تومان',
+      label: t('wishlist.summary.price'),
+      value: formatPrice(summary.estimatedTotalPrice) || t('wishlist.zeroPrice'),
     },
     {
-      label: 'کتاب‌های با اولویت بالا',
+      label: t('wishlist.summary.high'),
       value: formatNumber(summary.highPriorityCount),
     },
     {
-      label: 'کتاب‌های ضروری',
+      label: t('wishlist.summary.urgent'),
       value: formatNumber(summary.urgentPriorityCount),
     },
   ]
@@ -141,20 +141,17 @@ function WishlistPage() {
     <section className="library-page wishlist-page" aria-labelledby="wishlist-title">
       <div className="library-header">
         <div>
-          <h2 id="wishlist-title">لیست خرید</h2>
-          <p>
-            کتاب‌هایی را که قصد خریدشان را داری اینجا ثبت کن، اولویت بده و بعد
-            از خرید همان رکورد را به کتابخانه منتقل کن.
-          </p>
+          <h2 id="wishlist-title">{t('wishlist.title')}</h2>
+          <p>{t('wishlist.description')}</p>
         </div>
         <button className="button button-primary" type="button" onClick={openCreateForm}>
-          افزودن به لیست خرید
+          {t('books.addToWishlist')}
         </button>
       </div>
 
       <FeedbackMessage message={feedback} onDismiss={dismissFeedback} />
 
-      <div className="wishlist-summary" aria-label="خلاصه لیست خرید">
+      <div className="wishlist-summary" aria-label={t('wishlist.summaryAria')}>
         {summaryCards.map((card) => (
           <article className="summary-card wishlist-summary-card" key={card.label}>
             <span>{card.label}</span>
@@ -168,28 +165,28 @@ function WishlistPage() {
           books={wishlistBooks}
           controls={controls}
           enabledFilters={['category', 'priority']}
-          sortOptions={wishlistSortOptions}
+          sortOptions={getWishlistSortOptions(language.value)}
         />
       ) : null}
 
       {wishlistBooks.length === 0 ? (
         <div className="empty-state">
-          <h3>هنوز کتابی در لیست خریدت نیست.</h3>
-          <p>کتاب‌هایی را که قصد خریدشان را داری اینجا ثبت کن.</p>
+          <h3>{t('wishlist.emptyTitle')}</h3>
+          <p>{t('wishlist.emptyDescription')}</p>
           <button className="button button-primary" type="button" onClick={openCreateForm}>
-            افزودن اولین کتاب
+            {t('wishlist.addFirst')}
           </button>
         </div>
       ) : controls.visibleBooks.length === 0 ? (
         <div className="empty-state">
-          <h3>کتابی با این جست‌وجو یا فیلترها پیدا نشد.</h3>
-          <p>جست‌وجو یا فیلترها را تغییر بده.</p>
+          <h3>{t('wishlist.noResultsTitle')}</h3>
+          <p>{t('wishlist.noResultsDescription')}</p>
           <button
             className="button button-primary"
             type="button"
             onClick={controls.clearControls}
           >
-            پاک کردن فیلترها
+            {t('common.clearFilters')}
           </button>
         </div>
       ) : controls.viewMode === VIEW_MODE.LIST ? (
@@ -225,15 +222,15 @@ function WishlistPage() {
       />
 
       <ConfirmDialog
-        confirmLabel="حذف کتاب"
+        confirmLabel={t('books.deleteBook')}
         isConfirming={isDeleting}
         isOpen={Boolean(deleteCandidate)}
         message={
           deleteCandidate
-            ? `آیا از حذف کتاب «${deleteCandidate.title}» مطمئن هستید؟ این کار قابل بازگشت نیست.`
+            ? t('books.deleteBookMessage', { title: deleteCandidate.title })
             : ''
         }
-        title="حذف کتاب"
+        title={t('books.deleteBook')}
         onCancel={() => setDeleteCandidate(null)}
         onConfirm={handleConfirmDelete}
       />

@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import Header from '../components/layout/Header'
 import Sidebar from '../components/layout/Sidebar'
+import { usePreferences } from '../context/usePreferences'
 
 function AppLayout() {
   const location = useLocation()
+  const { language, t } = usePreferences()
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   useEffect(() => {
@@ -28,7 +30,13 @@ function AppLayout() {
   }, [isSidebarOpen])
 
   return (
-    <div className={`app-shell${isSidebarOpen ? ' sidebar-open' : ''}`} dir="rtl">
+    <div
+      className={`app-shell${isSidebarOpen ? ' sidebar-open' : ''}`}
+      dir={language.dir}
+    >
+      <a className="skip-link" href="#main-content">
+        {t('app.skipToContent')}
+      </a>
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <button
         aria-hidden="true"
@@ -42,7 +50,7 @@ function AppLayout() {
           isSidebarOpen={isSidebarOpen}
           onMenuClick={() => setIsSidebarOpen((currentValue) => !currentValue)}
         />
-        <main className="app-main">
+        <main className="app-main" id="main-content">
           <Outlet />
         </main>
       </div>

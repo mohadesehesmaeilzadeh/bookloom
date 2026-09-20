@@ -1,39 +1,41 @@
 import { Link } from 'react-router-dom'
 import BookCollectionView from '../components/books/BookCollectionView'
-import { BOOK_SORT } from '../constants/bookSortOptions'
+import { BOOK_SORT, localizeBookSortOptions } from '../constants/bookSortOptions'
 import { ROUTES } from '../constants/routes'
 import { useBooksContext } from '../context/useBooksContext'
+import { usePreferences } from '../context/usePreferences'
 import { getFinishedBooks } from '../utils/bookSelectors'
 
 function FinishedPage() {
   const { books } = useBooksContext()
+  const { language, t } = usePreferences()
 
   return (
     <BookCollectionView
       books={getFinishedBooks(books)}
-      description="کتاب‌هایی که مطالعه آن‌ها به پایان رسیده است."
+      description={t('finished.description')}
       enabledFilters={['category']}
       initialSort={BOOK_SORT.FINISHED_NEWEST}
-      sortOptions={[
-        { value: BOOK_SORT.FINISHED_NEWEST, label: 'جدیدترین پایان مطالعه' },
-        { value: BOOK_SORT.FINISHED_OLDEST, label: 'قدیمی‌ترین پایان مطالعه' },
-        { value: BOOK_SORT.TITLE, label: 'نام کتاب' },
-        { value: BOOK_SORT.AUTHOR, label: 'نام نویسنده' },
-        { value: BOOK_SORT.HIGHEST_RATING, label: 'بیشترین امتیاز' },
-        { value: BOOK_SORT.MOST_PAGES, label: 'بیشترین تعداد صفحات' },
-      ]}
+      sortOptions={localizeBookSortOptions([
+        { value: BOOK_SORT.FINISHED_NEWEST, labelKey: 'sort.finishedNewest' },
+        { value: BOOK_SORT.FINISHED_OLDEST, labelKey: 'sort.finishedOldest' },
+        { value: BOOK_SORT.TITLE, labelKey: 'sort.title' },
+        { value: BOOK_SORT.AUTHOR, labelKey: 'sort.author' },
+        { value: BOOK_SORT.HIGHEST_RATING, labelKey: 'sort.highestRating' },
+        { value: BOOK_SORT.MOST_PAGES, labelKey: 'sort.mostPages' },
+      ], language.value)}
       storageNamespace="finished"
       emptyDescription={
         <>
-          از{' '}
+          {t('finished.emptyPrefix')}{' '}
           <Link className="inline-link" to={ROUTES.LIBRARY}>
-            کتابخانه
+            {t('route.library.title')}
           </Link>
-          ، کتابی را شروع کن و پس از پایان مطالعه اینجا ثبتش کن.
+          {t('finished.emptySuffix')}
         </>
       }
-      emptyTitle="هنوز کتابی را به‌عنوان تمام‌شده ثبت نکرده‌ای."
-      title="کتاب‌های تمام‌شده"
+      emptyTitle={t('finished.emptyTitle')}
+      title={t('route.finished.title')}
     />
   )
 }

@@ -1,3 +1,5 @@
+import { t } from '../i18n/localization'
+
 export const THEME = {
   LIGHT: 'light',
   DARK: 'dark',
@@ -7,19 +9,27 @@ export const THEME = {
 export const themeOptions = [
   {
     value: THEME.LIGHT,
-    label: 'روشن',
-    description: 'همیشه از ظاهر روشن استفاده می‌کند.',
+    labelKey: 'theme.light.label',
+    descriptionKey: 'theme.light.description',
   },
   {
     value: THEME.DARK,
-    label: 'تاریک',
-    description: 'همیشه از ظاهر تاریک استفاده می‌کند.',
+    labelKey: 'theme.dark.label',
+    descriptionKey: 'theme.dark.description',
   },
   {
     value: THEME.SYSTEM,
-    label: 'مطابق تنظیمات سیستم',
-    description: 'ظاهر Bookloom را با تنظیم روشن یا تاریک سیستم هماهنگ می‌کند.',
+    labelKey: 'theme.system.label',
+    descriptionKey: 'theme.system.description',
   },
 ]
 
 export const themeValues = themeOptions.map((theme) => theme.value)
+
+export function getThemeOptions(language) {
+  return themeOptions.map((theme) => ({
+    ...theme,
+    description: t(theme.descriptionKey, undefined, language),
+    label: t(theme.labelKey, undefined, language),
+  }))
+}

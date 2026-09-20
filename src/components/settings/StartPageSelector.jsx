@@ -1,9 +1,13 @@
-import { startPageOptions } from '../../constants/startPageOptions'
+import { getStartPageOptions } from '../../constants/startPageOptions'
+import { usePreferences } from '../../context/usePreferences'
 
 function StartPageSelector({ selectedStartPage, onChange }) {
+  const { language, t } = usePreferences()
+  const startPageOptions = getStartPageOptions(language.value)
+
   return (
     <label className="form-field">
-      <span>صفحه شروع برنامه</span>
+      <span>{t('settings.startPageLabel')}</span>
       <select
         value={selectedStartPage}
         onChange={(event) => onChange(event.target.value)}

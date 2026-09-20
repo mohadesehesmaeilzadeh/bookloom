@@ -10,6 +10,7 @@ import {
   normalizePreferencePatch,
   normalizePreferences,
 } from '../utils/preferenceValidation'
+import { getLanguageMeta, translate } from '../i18n/localization'
 
 function getSystemTheme() {
   if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
@@ -27,15 +28,36 @@ function applyRootPreferences(preferences, resolvedTheme) {
   }
 
   const root = document.documentElement
+  const language = getLanguageMeta(preferences.language)
+
   root.dataset.theme = resolvedTheme
   root.dataset.accent = preferences.accentColor
   root.dataset.persianDigits = preferences.usePersianDigits ? 'true' : 'false'
+  root.dataset.language = language.value
+  root.dir = language.dir
+  root.lang = language.value
+  document.title = translate(language.value, 'app.brand.title')
 }
 
 export function PreferencesProvider({ children }) {
-  const [preferences, setPreferences] = useState(loadPreferences)
+  const [preferences, setPreferences] = useState(() => {
+    const initialPreferences = loadPreferences()
+    const initialSystemTheme = getSystemTheme()
+    const initialTheme = initialPreferences.theme === THEME.SYSTEM
+      ? initialSystemTheme
+      : initialPreferences.theme
+
+    applyRootPreferences(initialPreferences, initialTheme)
+
+    return initialPreferences
+  })
   const [systemTheme, setSystemTheme] = useState(getSystemTheme)
   const resolvedTheme = preferences.theme === THEME.SYSTEM ? systemTheme : preferences.theme
+  const language = getLanguageMeta(preferences.language)
+  const t = useCallback(
+    (key, values) => translate(language.value, key, values),
+    [language.value],
+  )
 
   useEffect(() => {
     if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
@@ -73,10 +95,15 @@ export function PreferencesProvider({ children }) {
       return { preferences: normalizedPreferences, success: false }
     }
 
+    const nextTheme = normalizedPreferences.theme === THEME.SYSTEM
+      ? systemTheme
+      : normalizedPreferences.theme
+
+    applyRootPreferences(normalizedPreferences, nextTheme)
     setPreferences(normalizedPreferences)
 
     return { preferences: normalizedPreferences, success: true }
-  }, [])
+  }, [systemTheme])
 
   const updatePreferences = useCallback((updates) => {
     const patch = normalizePreferencePatch(updates)
@@ -89,10 +116,15 @@ export function PreferencesProvider({ children }) {
       return { preferences: nextPreferences, success: false }
     }
 
+    const nextTheme = nextPreferences.theme === THEME.SYSTEM
+      ? systemTheme
+      : nextPreferences.theme
+
+    applyRootPreferences(nextPreferences, nextTheme)
     setPreferences(nextPreferences)
 
     return { preferences: nextPreferences, success: true }
-  }, [preferences])
+  }, [preferences, systemTheme])
 
   const updatePreference = useCallback(
     (key, value) => updatePreferences({ [key]: value }),
@@ -105,16 +137,20 @@ export function PreferencesProvider({ children }) {
 
   const value = useMemo(() => ({
     preferences,
+    language,
     replacePreferences,
     resetPreferences,
     resolvedTheme,
+    t,
     updatePreference,
     updatePreferences,
   }), [
+    language,
     preferences,
     replacePreferences,
     resetPreferences,
     resolvedTheme,
+    t,
     updatePreference,
     updatePreferences,
   ])

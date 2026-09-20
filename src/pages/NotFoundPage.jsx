@@ -1,13 +1,16 @@
 import { Link } from 'react-router-dom'
 import { ROUTES } from '../constants/routes'
+import { usePreferences } from '../context/usePreferences'
 
 function NotFoundPage() {
+  const { t } = usePreferences()
+
   return (
     <section className="placeholder-page" aria-labelledby="not-found-title">
-      <h2 id="not-found-title">صفحه پیدا نشد</h2>
-      <p>آدرسی که باز کرده‌اید در Bookloom وجود ندارد.</p>
+      <h2 id="not-found-title">{t('app.notFound.title')}</h2>
+      <p>{t('app.notFound.description')}</p>
       <Link className="button button-primary" to={ROUTES.DASHBOARD}>
-        بازگشت به داشبورد
+        {t('app.notFound.back')}
       </Link>
     </section>
   )

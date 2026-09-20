@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { usePreferences } from '../../context/usePreferences'
 import { formatNumber } from '../../utils/formatNumber'
 
 function formatValue(value) {
@@ -6,6 +7,7 @@ function formatValue(value) {
 }
 
 function StatisticCard({ description, link, title, value }) {
+  const { t } = usePreferences()
   const content = (
     <>
       <span>{title}</span>
@@ -19,7 +21,7 @@ function StatisticCard({ description, link, title, value }) {
       <article className="summary-card statistic-card">
         {content}
         <Link className="inline-link" to={link}>
-          مشاهده
+          {t('common.view')}
         </Link>
       </article>
     )

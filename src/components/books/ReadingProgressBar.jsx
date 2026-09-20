@@ -4,6 +4,7 @@ import {
   normalizeProgressValues,
 } from '../../utils/readingProgress'
 import { formatNumber } from '../../utils/formatNumber'
+import { usePreferences } from '../../context/usePreferences'
 
 function ReadingProgressBar({
   currentPage,
@@ -11,6 +12,7 @@ function ReadingProgressBar({
   showDetails = true,
   size = 'full',
 }) {
+  const { t } = usePreferences()
   const normalized = normalizeProgressValues({ currentPage, totalPages })
   const progress = calculateReadingProgress(
     normalized.currentPage,
@@ -29,13 +31,15 @@ function ReadingProgressBar({
         <>
           <div className="progress-topline">
             <span>
-              صفحه {formatNumber(normalized.currentPage)} از{' '}
-              {formatNumber(normalized.totalPages)}
+              {t('books.pageOf', {
+                current: formatNumber(normalized.currentPage),
+                total: formatNumber(normalized.totalPages),
+              })}
             </span>
-            <strong>{formatNumber(progress)}٪ مطالعه شده</strong>
+            <strong>{t('books.progressRead', { value: formatNumber(progress) })}</strong>
           </div>
           <div
-            aria-label={`پیشرفت مطالعه ${formatNumber(progress)} درصد`}
+            aria-label={t('books.progressAria', { value: formatNumber(progress) })}
             aria-valuemax="100"
             aria-valuemin="0"
             aria-valuenow={progress}
@@ -46,17 +50,17 @@ function ReadingProgressBar({
           </div>
           {showDetails ? (
             <p>
-              {formatNumber(remainingPages)} صفحه باقی مانده
+              {t('books.remainingPages', { count: formatNumber(remainingPages) })}
             </p>
           ) : null}
         </>
       ) : (
         <>
           <div className="progress-topline">
-            <span>صفحه فعلی: {formatNumber(normalized.currentPage)}</span>
+            <span>{t('books.currentPage', { page: formatNumber(normalized.currentPage) })}</span>
           </div>
           <div
-            aria-label="تعداد کل صفحات مشخص نشده است"
+            aria-label={t('books.unknownTotalPages')}
             aria-valuemax="100"
             aria-valuemin="0"
             aria-valuenow="0"
@@ -65,7 +69,7 @@ function ReadingProgressBar({
           >
             <span style={{ width: '0%' }} />
           </div>
-          {showDetails ? <p>تعداد کل صفحات مشخص نشده است.</p> : null}
+          {showDetails ? <p>{t('books.unknownTotalPagesSentence')}</p> : null}
         </>
       )}
     </div>

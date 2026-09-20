@@ -3,6 +3,7 @@ import { getBookPriorityLabel } from '../../constants/bookPriorities'
 import { getBookStatusLabel } from '../../constants/bookStatuses'
 import { getBookDetailsPath } from '../../constants/routes'
 import { BOOK_STATUS } from '../../constants/bookStatuses'
+import { usePreferences } from '../../context/usePreferences'
 import { formatDateTime } from '../../utils/dateUtils'
 import { formatNumber } from '../../utils/formatNumber'
 import BookStatusActions from './BookStatusActions'
@@ -17,15 +18,18 @@ function BookCard({
   onStatusChange,
   showProgressDetails = false,
 }) {
+  const { language, t } = usePreferences()
   const showProgress =
     book.status === BOOK_STATUS.READING ||
     book.status === BOOK_STATUS.PAUSED ||
     (book.status === BOOK_STATUS.FINISHED && book.totalPages > 0)
   const details = [
-    book.author ? `نویسنده: ${book.author}` : '',
-    book.category ? `دسته‌بندی: ${book.category}` : '',
-    book.totalPages > 0 ? `${formatNumber(book.totalPages)} صفحه` : '',
-    book.purchaseDate ? `خرید: ${book.purchaseDate}` : '',
+    book.author ? `${t('bookFields.author')}: ${book.author}` : '',
+    book.category ? `${t('bookFields.category')}: ${book.category}` : '',
+    book.totalPages > 0
+      ? `${formatNumber(book.totalPages)} ${t('common.pages')}`
+      : '',
+    book.purchaseDate ? `${t('bookFields.purchase')}: ${book.purchaseDate}` : '',
   ].filter(Boolean)
 
   return (
@@ -33,9 +37,11 @@ function BookCard({
       <div className="book-card-header">
         <div>
           <h3>{book.title}</h3>
-          <p>{getBookStatusLabel(book.status)}</p>
+          <p>{getBookStatusLabel(book.status, language.value)}</p>
         </div>
-        <span className="book-priority">{getBookPriorityLabel(book.priority)}</span>
+        <span className="book-priority">
+          {getBookPriorityLabel(book.priority, language.value)}
+        </span>
       </div>
 
       {details.length > 0 ? (
@@ -58,7 +64,7 @@ function BookCard({
           />
           {book.lastProgressUpdate ? (
             <p className="progress-updated">
-              آخرین به‌روزرسانی: {formatDateTime(book.lastProgressUpdate)}
+              {t('books.lastProgressUpdate')}: {formatDateTime(book.lastProgressUpdate)}
             </p>
           ) : null}
         </div>
@@ -71,20 +77,20 @@ function BookCard({
             <p>{book.personalReview}</p>
           ) : null}
           {book.status === BOOK_STATUS.FINISHED && book.quotes?.length > 0 ? (
-            <span>{formatNumber(book.quotes.length)} نقل‌قول</span>
+            <span>{t('bookFields.quotesCount', { count: formatNumber(book.quotes.length) })}</span>
           ) : null}
         </div>
       ) : null}
 
       <div className="book-card-actions">
         <Link className="button button-ghost" to={getBookDetailsPath(book.id)}>
-          مشاهده
+          {t('common.view')}
         </Link>
         <button className="button button-secondary" type="button" onClick={() => onEdit(book)}>
-          ویرایش
+          {t('common.edit')}
         </button>
         <button className="button button-danger-soft" type="button" onClick={() => onDelete(book)}>
-          حذف
+          {t('common.delete')}
         </button>
       </div>
 
@@ -95,7 +101,7 @@ function BookCard({
             type="button"
             onClick={() => onProgressUpdate?.(book)}
           >
-            به‌روزرسانی پیشرفت
+            {t('books.updateProgress')}
           </button>
         </div>
       ) : null}

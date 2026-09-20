@@ -1,3 +1,5 @@
+import { t } from '../i18n/localization'
+
 export const BOOK_SORT = {
   NEWEST: 'newest',
   OLDEST: 'oldest',
@@ -15,17 +17,27 @@ export const BOOK_SORT = {
 }
 
 export const bookSortOptions = [
-  { value: BOOK_SORT.NEWEST, label: 'جدیدترین' },
-  { value: BOOK_SORT.OLDEST, label: 'قدیمی‌ترین' },
-  { value: BOOK_SORT.TITLE, label: 'نام کتاب' },
-  { value: BOOK_SORT.AUTHOR, label: 'نام نویسنده' },
-  { value: BOOK_SORT.HIGHEST_RATING, label: 'بیشترین امتیاز' },
-  { value: BOOK_SORT.HIGHEST_PROGRESS, label: 'بیشترین پیشرفت' },
-  { value: BOOK_SORT.LOWEST_PRICE, label: 'کمترین قیمت' },
-  { value: BOOK_SORT.HIGHEST_PRICE, label: 'بیشترین قیمت' },
-  { value: BOOK_SORT.RECENTLY_UPDATED, label: 'آخرین به‌روزرسانی' },
+  { value: BOOK_SORT.NEWEST, labelKey: 'sort.newest' },
+  { value: BOOK_SORT.OLDEST, labelKey: 'sort.oldest' },
+  { value: BOOK_SORT.TITLE, labelKey: 'sort.title' },
+  { value: BOOK_SORT.AUTHOR, labelKey: 'sort.author' },
+  { value: BOOK_SORT.HIGHEST_RATING, labelKey: 'sort.highestRating' },
+  { value: BOOK_SORT.HIGHEST_PROGRESS, labelKey: 'sort.highestProgress' },
+  { value: BOOK_SORT.LOWEST_PRICE, labelKey: 'sort.lowestPrice' },
+  { value: BOOK_SORT.HIGHEST_PRICE, labelKey: 'sort.highestPrice' },
+  { value: BOOK_SORT.RECENTLY_UPDATED, labelKey: 'sort.recentlyUpdated' },
 ]
 
-export function getBookSortOptions(values) {
-  return bookSortOptions.filter((option) => values.includes(option.value))
+export function localizeBookSortOptions(options, language) {
+  return options.map((option) => ({
+    ...option,
+    label: option.label ?? t(option.labelKey, undefined, language),
+  }))
+}
+
+export function getBookSortOptions(values, language) {
+  return localizeBookSortOptions(
+    bookSortOptions.filter((option) => values.includes(option.value)),
+    language,
+  )
 }

@@ -1,19 +1,21 @@
 import { formatNumber } from '../../utils/formatNumber'
+import { usePreferences } from '../../context/usePreferences'
 
 function ReadingPagesSummary({ summary }) {
+  const { t } = usePreferences()
   const metrics = [
-    { label: 'صفحات کتاب‌های تمام‌شده', value: summary.pagesInFinishedBooks },
-    { label: 'صفحات خوانده‌شده در کتاب‌های فعال', value: summary.activePagesRead },
-    { label: 'صفحات کتاب‌های رهاشده', value: summary.abandonedPagesRead },
-    { label: 'میانگین صفحات کتاب تمام‌شده', value: summary.averagePagesPerFinishedBook },
+    { label: t('dashboard.pages.finished'), value: summary.pagesInFinishedBooks },
+    { label: t('dashboard.pages.active'), value: summary.activePagesRead },
+    { label: t('dashboard.pages.abandoned'), value: summary.abandonedPagesRead },
+    { label: t('dashboard.pages.average'), value: summary.averagePagesPerFinishedBook },
   ]
 
   return (
     <section className="dashboard-section" aria-labelledby="pages-summary-title">
       <div className="library-header">
         <div>
-          <h2 id="pages-summary-title">خلاصه صفحات مطالعه</h2>
-          <p>این اعداد از وضعیت فعلی کتاب‌ها محاسبه می‌شوند و تاریخچه روزانه نیستند.</p>
+          <h2 id="pages-summary-title">{t('dashboard.pages.title')}</h2>
+          <p>{t('dashboard.pages.description')}</p>
         </div>
       </div>
 

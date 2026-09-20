@@ -2,39 +2,44 @@ import BookCollectionView from '../components/books/BookCollectionView'
 import RecommendationButton from '../components/recommendations/RecommendationButton'
 import { BOOK_SORT, getBookSortOptions } from '../constants/bookSortOptions'
 import { useBooksContext } from '../context/useBooksContext'
+import { usePreferences } from '../context/usePreferences'
 import { getLibraryBooks } from '../utils/bookSelectors'
 
 function LibraryPage() {
   const { books } = useBooksContext()
+  const { language, t } = usePreferences()
 
   return (
     <BookCollectionView
-      addButtonLabel="افزودن کتاب"
+      addButtonLabel={t('books.addBook')}
       allowCreate
       books={getLibraryBooks(books)}
-      description="کتاب‌های ثبت‌شده را ببینید، کتاب تازه اضافه کنید و اطلاعات پایه هر کتاب را ویرایش کنید."
+      description={t('library.description')}
       enabledFilters={['category', 'status', 'priority']}
-      emptyActionLabel="افزودن اولین کتاب"
-      emptyDescription="اولین کتابت را اضافه کن تا Bookloom کم‌کم به کتابخانه شخصی تو تبدیل شود."
-      emptyTitle="هنوز کتابی در کتابخانه ثبت نشده است."
+      emptyActionLabel={t('library.emptyAction')}
+      emptyDescription={t('library.emptyDescription')}
+      emptyTitle={t('library.emptyTitle')}
       initialSort={BOOK_SORT.NEWEST}
-      noResultsDescription="جست‌وجو، دسته‌بندی، وضعیت یا اولویت را تغییر بده."
+      noResultsDescription={t('library.noResultsDescription')}
       renderHeaderActions={({ setFeedback }) => (
         <RecommendationButton onFeedback={setFeedback} />
       )}
-      sortOptions={getBookSortOptions([
-        BOOK_SORT.NEWEST,
-        BOOK_SORT.OLDEST,
-        BOOK_SORT.TITLE,
-        BOOK_SORT.AUTHOR,
-        BOOK_SORT.HIGHEST_PROGRESS,
-        BOOK_SORT.HIGHEST_RATING,
-        BOOK_SORT.LOWEST_PRICE,
-        BOOK_SORT.HIGHEST_PRICE,
-        BOOK_SORT.RECENTLY_UPDATED,
-      ])}
+      sortOptions={getBookSortOptions(
+        [
+          BOOK_SORT.NEWEST,
+          BOOK_SORT.OLDEST,
+          BOOK_SORT.TITLE,
+          BOOK_SORT.AUTHOR,
+          BOOK_SORT.HIGHEST_PROGRESS,
+          BOOK_SORT.HIGHEST_RATING,
+          BOOK_SORT.LOWEST_PRICE,
+          BOOK_SORT.HIGHEST_PRICE,
+          BOOK_SORT.RECENTLY_UPDATED,
+        ],
+        language.value,
+      )}
       storageNamespace="library"
-      title="کتابخانه من"
+      title={t('route.library.title')}
     />
   )
 }

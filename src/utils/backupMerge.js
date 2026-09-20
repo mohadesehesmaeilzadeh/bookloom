@@ -1,6 +1,7 @@
 import { normalizeBook, normalizeBooks } from './bookValidation'
 import { normalizePreferencePatch, normalizePreferences } from './preferenceValidation'
 import { normalizeReadingGoals } from './readingGoalStorage'
+import { t } from '../i18n/localization'
 
 function timestamp(value) {
   const parsed = Date.parse(value)
@@ -27,7 +28,7 @@ function compareByUpdatedAt(importedBook, localBook) {
   return 0
 }
 
-export function resolveImportedBookDuplicates(importedBooks) {
+export function resolveImportedBookDuplicates(importedBooks, language) {
   const duplicates = new Map()
   const warnings = []
 
@@ -40,7 +41,7 @@ export function resolveImportedBookDuplicates(importedBooks) {
       continue
     }
 
-    warnings.push(`شناسه تکراری «${book.id}» در فایل پشتیبان حل شد.`)
+    warnings.push(t('backup.validation.duplicateResolved', { id: book.id }, language))
 
     if (compareByUpdatedAt(book, existingBook) > 0) {
       duplicates.set(book.id, book)
@@ -53,9 +54,9 @@ export function resolveImportedBookDuplicates(importedBooks) {
   }
 }
 
-export function mergeBooks(currentBooks, importedBooks) {
+export function mergeBooks(currentBooks, importedBooks, language) {
   const normalizedCurrentBooks = normalizeBooks(currentBooks)
-  const importedResolution = resolveImportedBookDuplicates(importedBooks)
+  const importedResolution = resolveImportedBookDuplicates(importedBooks, language)
   const importedById = new Map(importedResolution.books.map((book) => [book.id, book]))
   const usedIds = new Set()
   const summary = {
@@ -139,8 +140,8 @@ export function mergeCollectionPreferences(currentPreferences, importedPreferenc
 
 export const mergePreferences = mergeCollectionPreferences
 
-export function createMergedBookloomData(currentData, importedData) {
-  const bookMerge = mergeBooks(currentData.books, importedData.books)
+export function createMergedBookloomData(currentData, importedData, language) {
+  const bookMerge = mergeBooks(currentData.books, importedData.books, language)
   const goalMerge = mergeReadingGoals(currentData.readingGoals, importedData.readingGoals)
   const preferenceMerge = mergeCollectionPreferences(
     currentData.preferences ?? currentData.collectionPreferences,

@@ -1,3 +1,5 @@
+import { t } from '../i18n/localization'
+
 export const BOOK_STATUS = {
   WISHLIST: 'wishlist',
   OWNED: 'owned',
@@ -12,38 +14,38 @@ export const DEFAULT_BOOK_STATUS = BOOK_STATUS.OWNED
 export const bookStatuses = [
   {
     value: BOOK_STATUS.WISHLIST,
-    label: 'لیست خرید',
-    description: 'کتابی که قصد خرید یا تهیه آن را دارید.',
+    labelKey: 'status.wishlist.label',
+    descriptionKey: 'status.wishlist.description',
     key: 'wishlist',
   },
   {
     value: BOOK_STATUS.OWNED,
-    label: 'خریداری‌شده',
-    description: 'کتابی که تهیه شده و در کتابخانه شخصی شماست.',
+    labelKey: 'status.owned.label',
+    descriptionKey: 'status.owned.description',
     key: 'owned',
   },
   {
     value: BOOK_STATUS.READING,
-    label: 'در حال مطالعه',
-    description: 'کتابی که اکنون در حال خواندن آن هستید.',
+    labelKey: 'status.reading.label',
+    descriptionKey: 'status.reading.description',
     key: 'reading',
   },
   {
     value: BOOK_STATUS.PAUSED,
-    label: 'متوقف‌شده',
-    description: 'کتابی که خواندن آن فعلا متوقف شده است.',
+    labelKey: 'status.paused.label',
+    descriptionKey: 'status.paused.description',
     key: 'paused',
   },
   {
     value: BOOK_STATUS.FINISHED,
-    label: 'تمام‌شده',
-    description: 'کتابی که مطالعه آن به پایان رسیده است.',
+    labelKey: 'status.finished.label',
+    descriptionKey: 'status.finished.description',
     key: 'finished',
   },
   {
     value: BOOK_STATUS.ABANDONED,
-    label: 'رهاشده',
-    description: 'کتابی که تصمیم گرفته‌اید ادامه ندهید.',
+    labelKey: 'status.abandoned.label',
+    descriptionKey: 'status.abandoned.description',
     key: 'abandoned',
   },
 ]
@@ -54,6 +56,16 @@ export const bookStatusByValue = Object.fromEntries(
   bookStatuses.map((status) => [status.value, status]),
 )
 
-export function getBookStatusLabel(value) {
-  return bookStatusByValue[value]?.label ?? bookStatusByValue[DEFAULT_BOOK_STATUS].label
+export function getBookStatuses(language) {
+  return bookStatuses.map((status) => ({
+    ...status,
+    description: t(status.descriptionKey, undefined, language),
+    label: t(status.labelKey, undefined, language),
+  }))
+}
+
+export function getBookStatusLabel(value, language) {
+  const status = bookStatusByValue[value] ?? bookStatusByValue[DEFAULT_BOOK_STATUS]
+
+  return t(status.labelKey, undefined, language)
 }

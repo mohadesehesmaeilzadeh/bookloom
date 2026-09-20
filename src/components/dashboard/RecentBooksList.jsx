@@ -1,10 +1,13 @@
 import { Link } from 'react-router-dom'
 import { getBookStatusLabel } from '../../constants/bookStatuses'
 import { getBookDetailsPath } from '../../constants/routes'
+import { usePreferences } from '../../context/usePreferences'
 import { formatDate } from '../../utils/dateUtils'
 import { formatNumber } from '../../utils/formatNumber'
 
 function RecentBooksList({ books, dateField, emptyMessage, showPages = false, title }) {
+  const { language, t } = usePreferences()
+
   return (
     <section className="dashboard-section" aria-labelledby={`${dateField}-title`}>
       <div className="library-header">
@@ -20,16 +23,16 @@ function RecentBooksList({ books, dateField, emptyMessage, showPages = false, ti
               <div>
                 <p>{book.title}</p>
                 <span>
-                  {[book.author, getBookStatusLabel(book.status), formatDate(book[dateField])]
+                  {[book.author, getBookStatusLabel(book.status, language.value), formatDate(book[dateField])]
                     .filter(Boolean)
                     .join(' · ')}
                 </span>
                 {showPages && book.totalPages > 0 ? (
-                  <span>{formatNumber(book.totalPages)} صفحه</span>
+                  <span>{t('dashboard.pageCount', { count: formatNumber(book.totalPages) })}</span>
                 ) : null}
               </div>
               <Link className="inline-link" to={getBookDetailsPath(book.id)}>
-                جزئیات
+                {t('common.details')}
               </Link>
             </li>
           ))}

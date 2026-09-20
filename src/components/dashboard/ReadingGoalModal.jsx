@@ -1,18 +1,20 @@
 import { useEffect, useState } from 'react'
+import { usePreferences } from '../../context/usePreferences'
 import { formatPlainNumber } from '../../utils/formatNumber'
 import Modal from '../common/Modal'
 
-function validateGoal(value) {
+function validateGoal(value, t) {
   const number = Number(value)
 
   if (!Number.isInteger(number) || number < 0) {
-    return 'تعداد هدف باید یک عدد صحیح و غیرمنفی باشد.'
+    return t('dashboard.goal.validation')
   }
 
   return ''
 }
 
 function ReadingGoalModal({ goal, isOpen, onClose, onSubmit, year }) {
+  const { t } = usePreferences()
   const [value, setValue] = useState(String(goal ?? 0))
   const [error, setError] = useState('')
 
@@ -26,7 +28,7 @@ function ReadingGoalModal({ goal, isOpen, onClose, onSubmit, year }) {
   function handleSubmit(event) {
     event.preventDefault()
 
-    const nextError = validateGoal(value)
+    const nextError = validateGoal(value, t)
     setError(nextError)
 
     if (nextError) {
@@ -37,10 +39,10 @@ function ReadingGoalModal({ goal, isOpen, onClose, onSubmit, year }) {
   }
 
   return (
-    <Modal isOpen={isOpen} title="هدف مطالعه سالانه" onClose={onClose}>
+    <Modal isOpen={isOpen} title={t('dashboard.annualGoalTitle')} onClose={onClose}>
       <form className="book-form" noValidate onSubmit={handleSubmit}>
         <label className="form-field">
-          <span>تعداد کتاب هدف برای سال {formatPlainNumber(year)}</span>
+          <span>{t('dashboard.goal.inputLabel', { year: formatPlainNumber(year) })}</span>
           <input
             aria-describedby={error ? 'annual-goal-error' : undefined}
             aria-invalid={error ? 'true' : 'false'}
@@ -51,7 +53,7 @@ function ReadingGoalModal({ goal, isOpen, onClose, onSubmit, year }) {
             onChange={(event) => {
               setValue(event.target.value)
               if (error) {
-                setError(validateGoal(event.target.value))
+                setError(validateGoal(event.target.value, t))
               }
             }}
           />
@@ -64,10 +66,10 @@ function ReadingGoalModal({ goal, isOpen, onClose, onSubmit, year }) {
 
         <div className="form-actions">
           <button className="button button-secondary" type="button" onClick={onClose}>
-            انصراف
+            {t('common.cancel')}
           </button>
           <button className="button button-primary" type="submit">
-            ذخیره هدف
+            {t('dashboard.goal.save')}
           </button>
         </div>
       </form>

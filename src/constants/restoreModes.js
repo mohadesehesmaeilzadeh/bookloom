@@ -1,3 +1,5 @@
+import { t } from '../i18n/localization'
+
 export const RESTORE_MODE = {
   REPLACE: 'replace',
   MERGE: 'merge',
@@ -6,14 +8,20 @@ export const RESTORE_MODE = {
 export const restoreModes = [
   {
     value: RESTORE_MODE.MERGE,
-    label: 'ادغام با اطلاعات فعلی',
-    description:
-      'اطلاعات فایل پشتیبان با اطلاعات فعلی ترکیب می‌شود و برای کتاب‌های تکراری، نسخه جدیدتر حفظ خواهد شد.',
+    labelKey: 'restore.merge.label',
+    descriptionKey: 'restore.merge.description',
   },
   {
     value: RESTORE_MODE.REPLACE,
-    label: 'جایگزینی اطلاعات فعلی',
-    description:
-      'تمام اطلاعات فعلی Bookloom با اطلاعات فایل پشتیبان جایگزین می‌شود.',
+    labelKey: 'restore.replace.label',
+    descriptionKey: 'restore.replace.description',
   },
 ]
+
+export function getRestoreModes(language) {
+  return restoreModes.map((mode) => ({
+    ...mode,
+    description: t(mode.descriptionKey, undefined, language),
+    label: t(mode.labelKey, undefined, language),
+  }))
+}

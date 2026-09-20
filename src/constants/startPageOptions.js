@@ -1,30 +1,38 @@
 import { ROUTES } from './routes'
+import { t } from '../i18n/localization'
 
 export const startPageOptions = [
   {
     value: ROUTES.DASHBOARD,
-    label: 'داشبورد',
+    labelKey: 'nav.dashboard',
   },
   {
     value: ROUTES.LIBRARY,
-    label: 'کتابخانه من',
+    labelKey: 'nav.library',
   },
   {
     value: ROUTES.READING,
-    label: 'در حال مطالعه',
+    labelKey: 'nav.reading',
   },
   {
     value: ROUTES.WISHLIST,
-    label: 'لیست خرید',
+    labelKey: 'nav.wishlist',
   },
   {
     value: ROUTES.FINISHED,
-    label: 'تمام‌شده‌ها',
+    labelKey: 'nav.finished',
   },
   {
     value: ROUTES.STATISTICS,
-    label: 'آمار مطالعه',
+    labelKey: 'nav.statistics',
   },
 ]
 
 export const startPageValues = startPageOptions.map((page) => page.value)
+
+export function getStartPageOptions(language) {
+  return startPageOptions.map((page) => ({
+    ...page,
+    label: t(page.labelKey, undefined, language),
+  }))
+}

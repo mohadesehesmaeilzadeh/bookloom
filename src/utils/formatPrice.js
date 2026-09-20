@@ -1,4 +1,5 @@
 import { formatNumber } from './formatNumber'
+import { LANGUAGE, getDocumentLanguage } from '../i18n/localization'
 
 // Bookloom stores book prices in تومان. No currency conversion is applied.
 export function formatPrice(value, options = {}) {
@@ -8,5 +9,8 @@ export function formatPrice(value, options = {}) {
     return ''
   }
 
-  return `${formatNumber(number, options)} تومان`
+  const language = options.language ?? getDocumentLanguage()
+  const currencyLabel = language === LANGUAGE.EN ? 'tomans' : 'تومان'
+
+  return `${formatNumber(number, options)} ${currencyLabel}`
 }
