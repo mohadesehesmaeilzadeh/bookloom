@@ -1,14 +1,17 @@
 import { Link } from 'react-router-dom'
 import { getBookDetailsPath, ROUTES } from '../../constants/routes'
+import { usePreferences } from '../../context/usePreferences'
 import { formatNumber } from '../../utils/formatNumber'
 
 function DailyQuoteCard({ quoteItem }) {
+  const { t } = usePreferences()
+
   return (
     <section className="dashboard-section" aria-labelledby="daily-quote-title">
       <div className="library-header">
         <div>
-          <h2 id="daily-quote-title">نقل‌قول امروز</h2>
-          <p>یک نقل‌قول ذخیره‌شده بر اساس تاریخ امروز انتخاب می‌شود.</p>
+          <h2 id="daily-quote-title">{t('dashboard.quote.title')}</h2>
+          <p>{t('dashboard.quote.description')}</p>
         </div>
       </div>
 
@@ -20,18 +23,18 @@ function DailyQuoteCard({ quoteItem }) {
             {quoteItem.author ? ` · ${quoteItem.author}` : ''}
           </p>
           {quoteItem.quote.pageNumber !== '' ? (
-            <span>صفحه {formatNumber(quoteItem.quote.pageNumber)}</span>
+            <span>{t('dashboard.quote.page', { page: formatNumber(quoteItem.quote.pageNumber) })}</span>
           ) : null}
           <Link className="button button-secondary" to={getBookDetailsPath(quoteItem.bookId)}>
-            مشاهده کتاب
+            {t('dashboard.quote.viewBook')}
           </Link>
         </article>
       ) : (
         <div className="empty-state">
-          <h3>هنوز نقل‌قولی ثبت نکرده‌ای.</h3>
-          <p>از صفحه جزئیات کتاب‌ها جمله‌های موردعلاقه‌ات را ذخیره کن.</p>
+          <h3>{t('dashboard.quote.emptyTitle')}</h3>
+          <p>{t('dashboard.quote.emptyDescription')}</p>
           <Link className="button button-primary" to={ROUTES.LIBRARY}>
-            رفتن به کتابخانه
+            {t('dashboard.goLibrary')}
           </Link>
         </div>
       )}
