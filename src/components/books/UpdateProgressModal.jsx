@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import Modal from '../common/Modal'
+import { usePreferences } from '../../context/usePreferences'
+import { t } from '../../i18n/localization'
 
 function getInitialValues(book) {
   return {
@@ -8,21 +10,21 @@ function getInitialValues(book) {
   }
 }
 
-function validate(values) {
+function validate(values, language) {
   const errors = {}
   const currentPage = values.currentPage === '' ? 0 : Number(values.currentPage)
   const totalPages = values.totalPages === '' ? 0 : Number(values.totalPages)
 
   if (!Number.isFinite(currentPage)) {
-    errors.currentPage = 'مقدار واردشده معتبر نیست.'
+    errors.currentPage = t('validation.progress.valueInvalid', undefined, language)
   } else if (currentPage < 0) {
-    errors.currentPage = 'شماره صفحه نمی‌تواند منفی باشد.'
+    errors.currentPage = t('validation.progress.currentNonNegative', undefined, language)
   }
 
   if (!Number.isFinite(totalPages)) {
-    errors.totalPages = 'مقدار واردشده معتبر نیست.'
+    errors.totalPages = t('validation.progress.valueInvalid', undefined, language)
   } else if (totalPages < 0) {
-    errors.totalPages = 'تعداد کل صفحات نمی‌تواند منفی باشد.'
+    errors.totalPages = t('validation.progress.totalNonNegative', undefined, language)
   }
 
   if (
@@ -31,13 +33,14 @@ function validate(values) {
     totalPages > 0 &&
     currentPage > totalPages
   ) {
-    errors.currentPage = 'صفحه فعلی نمی‌تواند بیشتر از تعداد کل صفحات باشد.'
+    errors.currentPage = t('validation.progress.currentBeyondTotal', undefined, language)
   }
 
   return errors
 }
 
 function UpdateProgressModal({ book, isOpen, onClose, onSubmit }) {
+  const { language, t: translate } = usePreferences()
   const [values, setValues] = useState(() => getInitialValues(book))
   const [errors, setErrors] = useState({})
   const [wasSubmitted, setWasSubmitted] = useState(false)
@@ -59,7 +62,7 @@ function UpdateProgressModal({ book, isOpen, onClose, onSubmit }) {
     setValues(nextValues)
 
     if (wasSubmitted || errors[field]) {
-      setErrors(validate(nextValues))
+      setErrors(validate(nextValues, language.value))
     }
   }
 
@@ -67,7 +70,7 @@ function UpdateProgressModal({ book, isOpen, onClose, onSubmit }) {
     event.preventDefault()
     setWasSubmitted(true)
 
-    const nextErrors = validate(values)
+    const nextErrors = validate(values, language.value)
     setErrors(nextErrors)
 
     if (Object.keys(nextErrors).length > 0) {
@@ -81,11 +84,11 @@ function UpdateProgressModal({ book, isOpen, onClose, onSubmit }) {
   }
 
   return (
-    <Modal isOpen={isOpen} title="به‌روزرسانی پیشرفت مطالعه" onClose={onClose}>
+    <Modal isOpen={isOpen} title={translate('books.updateProgressTitle')} onClose={onClose}>
       <form className="book-form progress-form" noValidate onSubmit={handleSubmit}>
         <div className="form-grid">
           <label className="form-field">
-            <span>صفحه فعلی</span>
+            <span>{translate('bookFields.currentPage')}</span>
             <input
               aria-describedby={errors.currentPage ? 'current-page-error' : undefined}
               aria-invalid={errors.currentPage ? 'true' : 'false'}
@@ -103,7 +106,7 @@ function UpdateProgressModal({ book, isOpen, onClose, onSubmit }) {
           </label>
 
           <label className="form-field">
-            <span>تعداد کل صفحات</span>
+            <span>{translate('bookFields.totalPages')}</span>
             <input
               aria-describedby={errors.totalPages ? 'total-pages-error' : undefined}
               aria-invalid={errors.totalPages ? 'true' : 'false'}
@@ -123,10 +126,10 @@ function UpdateProgressModal({ book, isOpen, onClose, onSubmit }) {
 
         <div className="form-actions">
           <button className="button button-secondary" type="button" onClick={onClose}>
-            انصراف
+            {translate('common.cancel')}
           </button>
           <button className="button button-primary" type="submit">
-            ذخیره پیشرفت
+            {translate('books.saveProgress')}
           </button>
         </div>
       </form>
