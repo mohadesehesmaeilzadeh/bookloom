@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
+import { usePreferences } from '../../context/usePreferences'
 
 function BookNotesSection({ notes = '', onSave }) {
+  const { t } = usePreferences()
   const [isEditing, setIsEditing] = useState(false)
   const [value, setValue] = useState(notes)
 
@@ -19,12 +21,12 @@ function BookNotesSection({ notes = '', onSave }) {
     <section className="details-section editable-text-section" aria-labelledby="book-notes-title">
       <div className="dashboard-item-header">
         <div>
-          <h3 id="book-notes-title">یادداشت‌های من</h3>
-          <p>یادداشت‌های عمومی و شخصی درباره این کتاب.</p>
+          <h3 id="book-notes-title">{t('notes.title')}</h3>
+          <p>{t('notes.description')}</p>
         </div>
         {!isEditing ? (
           <button className="button button-secondary" type="button" onClick={() => setIsEditing(true)}>
-            ویرایش یادداشت‌ها
+            {t('notes.edit')}
           </button>
         ) : null}
       </div>
@@ -32,7 +34,7 @@ function BookNotesSection({ notes = '', onSave }) {
       {isEditing ? (
         <div className="book-form">
           <label className="form-field">
-            <span>متن یادداشت‌ها</span>
+            <span>{t('notes.textLabel')}</span>
             <textarea value={value} onChange={(event) => setValue(event.target.value)} />
           </label>
           <div className="form-actions">
@@ -44,10 +46,10 @@ function BookNotesSection({ notes = '', onSave }) {
                 setIsEditing(false)
               }}
             >
-              انصراف
+              {t('common.cancel')}
             </button>
             <button className="button button-primary" type="button" onClick={handleSave}>
-              ذخیره یادداشت‌ها
+              {t('notes.save')}
             </button>
           </div>
         </div>
@@ -55,7 +57,7 @@ function BookNotesSection({ notes = '', onSave }) {
         <p className="preserved-text">{notes}</p>
       ) : (
         <div className="soft-empty-state">
-          هنوز یادداشتی برای این کتاب ثبت نشده است.
+          {t('notes.empty')}
         </div>
       )}
     </section>
