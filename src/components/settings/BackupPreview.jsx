@@ -1,22 +1,24 @@
 import { formatDateTime } from '../../utils/dateUtils'
 import { formatNumber } from '../../utils/formatNumber'
+import { usePreferences } from '../../context/usePreferences'
 
 function BackupPreview({ backup, currentSummary, mergePreview, onCancel, onRestore, restoreMode }) {
+  const { t } = usePreferences()
   const preview = backup.preview
   const rows = [
-    ['تاریخ خروجی فایل', formatDateTime(backup.exportedAt)],
-    ['نسخه ساختار', formatNumber(backup.schemaVersion)],
-    ['کتاب‌ها', formatNumber(preview.bookCount)],
-    ['لیست خرید', formatNumber(preview.wishlistCount)],
-    ['تمام‌شده‌ها', formatNumber(preview.finishedCount)],
-    ['نقل‌قول‌ها', formatNumber(preview.quoteCount)],
-    ['سال‌های دارای هدف مطالعه', formatNumber(preview.readingGoalYearCount)],
-    ['تنظیمات نمایش', preview.hasCollectionPreferences ? 'وجود دارد' : 'وجود ندارد'],
+    [t('backup.exportedAt'), formatDateTime(backup.exportedAt)],
+    [t('backup.schemaVersion'), formatNumber(backup.schemaVersion)],
+    [t('settings.summary.books'), formatNumber(preview.bookCount)],
+    [t('backup.wishlist'), formatNumber(preview.wishlistCount)],
+    [t('backup.finished'), formatNumber(preview.finishedCount)],
+    [t('settings.summary.quotes'), formatNumber(preview.quoteCount)],
+    [t('settings.summary.goalYears'), formatNumber(preview.readingGoalYearCount)],
+    [t('backup.hasPreferences'), preview.hasCollectionPreferences ? t('backup.exists') : t('backup.missing')],
   ]
 
   return (
     <div className="backup-preview">
-      <h3>پیش‌نمایش فایل پشتیبان</h3>
+      <h3>{t('backup.previewTitle')}</h3>
       <dl className="backup-summary-grid">
         {rows.map(([label, value]) => (
           <div key={label}>
@@ -27,30 +29,30 @@ function BackupPreview({ backup, currentSummary, mergePreview, onCancel, onResto
       </dl>
 
       <div className="backup-comparison">
-        <h4>مقایسه با اطلاعات فعلی</h4>
+        <h4>{t('backup.compareTitle')}</h4>
         <dl className="backup-summary-grid">
           <div>
-            <dt>کتاب‌های فعلی</dt>
+            <dt>{t('backup.currentBooks')}</dt>
             <dd>{formatNumber(currentSummary.bookCount)}</dd>
           </div>
           <div>
-            <dt>کتاب‌های فایل</dt>
+            <dt>{t('backup.fileBooks')}</dt>
             <dd>{formatNumber(preview.bookCount)}</dd>
           </div>
           <div>
-            <dt>لیست خرید فعلی</dt>
+            <dt>{t('backup.currentWishlist')}</dt>
             <dd>{formatNumber(currentSummary.wishlistCount)}</dd>
           </div>
           <div>
-            <dt>لیست خرید فایل</dt>
+            <dt>{t('backup.fileWishlist')}</dt>
             <dd>{formatNumber(preview.wishlistCount)}</dd>
           </div>
           <div>
-            <dt>تمام‌شده‌های فعلی</dt>
+            <dt>{t('backup.currentFinished')}</dt>
             <dd>{formatNumber(currentSummary.finishedCount)}</dd>
           </div>
           <div>
-            <dt>تمام‌شده‌های فایل</dt>
+            <dt>{t('backup.fileFinished')}</dt>
             <dd>{formatNumber(preview.finishedCount)}</dd>
           </div>
         </dl>
@@ -58,22 +60,22 @@ function BackupPreview({ backup, currentSummary, mergePreview, onCancel, onResto
 
       {restoreMode === 'merge' && mergePreview ? (
         <div className="merge-preview">
-          <h4>پیش‌نمایش ادغام</h4>
+          <h4>{t('backup.mergePreviewTitle')}</h4>
           <dl className="backup-summary-grid">
             <div>
-              <dt>کتاب‌های افزوده‌شونده</dt>
+              <dt>{t('backup.mergeAdded')}</dt>
               <dd>{formatNumber(mergePreview.summary.books.added)}</dd>
             </div>
             <div>
-              <dt>کتاب‌های به‌روزشونده</dt>
+              <dt>{t('backup.mergeUpdated')}</dt>
               <dd>{formatNumber(mergePreview.summary.books.updated)}</dd>
             </div>
             <div>
-              <dt>کتاب‌های محلی حفظ‌شده</dt>
+              <dt>{t('backup.mergeKeptLocal')}</dt>
               <dd>{formatNumber(mergePreview.summary.books.keptLocal)}</dd>
             </div>
             <div>
-              <dt>شناسه‌های تکراری حل‌شده</dt>
+              <dt>{t('backup.mergeDuplicates')}</dt>
               <dd>{formatNumber(mergePreview.summary.books.duplicatesResolved)}</dd>
             </div>
           </dl>
@@ -82,10 +84,10 @@ function BackupPreview({ backup, currentSummary, mergePreview, onCancel, onResto
 
       <div className="form-actions">
         <button className="button button-secondary" type="button" onClick={onCancel}>
-          انصراف
+          {t('common.cancel')}
         </button>
         <button className="button button-primary" type="button" onClick={onRestore}>
-          ادامه برای بازیابی
+          {t('backup.continueRestore')}
         </button>
       </div>
     </div>
