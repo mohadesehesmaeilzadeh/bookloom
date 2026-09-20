@@ -6,6 +6,7 @@ import { RECOMMENDATION_MODE } from '../../constants/recommendationModes'
 import { createScoreBreakdownRows, formatRecommendationScore } from '../../utils/bookRecommendations'
 import { formatDate } from '../../utils/dateUtils'
 import { formatNumber } from '../../utils/formatNumber'
+import { usePreferences } from '../../context/usePreferences'
 
 function RecommendationResult({
   onClose,
@@ -13,20 +14,21 @@ function RecommendationResult({
   onStartReading,
   recommendation,
 }) {
+  const { language, t } = usePreferences()
   const book = recommendation?.book
 
   if (!book) {
     return (
       <div className="empty-state recommendation-empty">
-        <h3>{recommendation?.message ?? 'در حال حاضر کتابی برای پیشنهاد وجود ندارد.'}</h3>
-        <p>کتابی با وضعیت خریداری‌شده به کتابخانه اضافه کن یا یکی از کتاب‌های متوقف‌شده را نگه دار.</p>
+        <h3>{recommendation?.message ?? t('recommendation.none')}</h3>
+        <p>{t('recommendation.noEligibleDescription')}</p>
       </div>
     )
   }
 
   const scoreRows =
     recommendation.mode === RECOMMENDATION_MODE.WEIGHTED
-      ? createScoreBreakdownRows(recommendation.scoreBreakdown)
+      ? createScoreBreakdownRows(recommendation.scoreBreakdown, language.value)
       : []
 
   return (
@@ -36,42 +38,42 @@ function RecommendationResult({
           <h3>{book.title}</h3>
           {book.author ? <p>{book.author}</p> : null}
         </div>
-        <span className="book-priority">{getBookStatusLabel(book.status)}</span>
+        <span className="book-priority">{getBookStatusLabel(book.status, language.value)}</span>
       </div>
 
       <dl className="recommendation-meta">
         {book.category ? (
           <div>
-            <dt>دسته‌بندی</dt>
+            <dt>{t('bookFields.category')}</dt>
             <dd>{book.category}</dd>
           </div>
         ) : null}
         <div>
-          <dt>اولویت</dt>
-          <dd>{getBookPriorityLabel(book.priority)}</dd>
+          <dt>{t('bookFields.priority')}</dt>
+          <dd>{getBookPriorityLabel(book.priority, language.value)}</dd>
         </div>
         {book.totalPages > 0 ? (
           <div>
-            <dt>تعداد صفحات</dt>
+            <dt>{t('bookFields.totalPages')}</dt>
             <dd>{formatNumber(book.totalPages)}</dd>
           </div>
         ) : null}
         {book.purchaseDate ? (
           <div>
-            <dt>تاریخ خرید</dt>
+            <dt>{t('bookFields.purchaseDate')}</dt>
             <dd>{formatDate(book.purchaseDate)}</dd>
           </div>
         ) : null}
         {book.status === BOOK_STATUS.PAUSED ? (
           <div>
-            <dt>صفحه فعلی</dt>
+            <dt>{t('bookFields.currentPage')}</dt>
             <dd>{formatNumber(book.currentPage)}</dd>
           </div>
         ) : null}
       </dl>
 
       <div className="recommendation-reasons">
-        <h4>چرا این کتاب؟</h4>
+        <h4>{t('recommendation.why')}</h4>
         <ul>
           {recommendation.reasons.map((reason) => (
             <li key={reason}>{reason}</li>
@@ -81,7 +83,11 @@ function RecommendationResult({
 
       {recommendation.mode === RECOMMENDATION_MODE.WEIGHTED ? (
         <div className="score-breakdown">
-          <strong>امتیاز پیشنهاد: {formatRecommendationScore(recommendation.totalScore)}</strong>
+          <strong>
+            {t('recommendation.score', {
+              score: formatRecommendationScore(recommendation.totalScore),
+            })}
+          </strong>
           {scoreRows.length > 0 ? (
             <dl>
               {scoreRows.map(([label, value]) => (
@@ -97,16 +103,18 @@ function RecommendationResult({
 
       <div className="form-actions">
         <Link className="button button-secondary" to={getBookDetailsPath(book.id)} onClick={onClose}>
-          مشاهده جزئیات
+          {t('common.viewDetails')}
         </Link>
         <button className="button button-primary" type="button" onClick={() => onStartReading(book)}>
-          {book.status === BOOK_STATUS.PAUSED ? 'ادامه مطالعه' : 'شروع مطالعه'}
+          {book.status === BOOK_STATUS.PAUSED
+            ? t('statusAction.resume-reading.label')
+            : t('statusAction.start-reading.label')}
         </button>
         <button className="button button-ghost" type="button" onClick={onGenerateAnother}>
-          پیشنهاد دوباره
+          {t('recommendation.startAgain')}
         </button>
         <button className="button button-secondary" type="button" onClick={onClose}>
-          بستن
+          {t('common.close')}
         </button>
       </div>
     </article>
