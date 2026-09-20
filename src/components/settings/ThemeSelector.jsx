@@ -1,9 +1,13 @@
-import { themeOptions } from '../../constants/themeOptions'
+import { getThemeOptions } from '../../constants/themeOptions'
+import { usePreferences } from '../../context/usePreferences'
 
 function ThemeSelector({ selectedTheme, onChange }) {
+  const { language, t } = usePreferences()
+  const themeOptions = getThemeOptions(language.value)
+
   return (
     <fieldset className="settings-option-group">
-      <legend>تم برنامه</legend>
+      <legend>{t('settings.themeLegend')}</legend>
       <div className="option-card-grid">
         {themeOptions.map((theme) => (
           <label className="option-card" key={theme.value}>
