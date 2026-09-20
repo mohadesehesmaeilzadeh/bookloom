@@ -1,29 +1,34 @@
 import { formatNumber, formatPlainNumber } from '../../utils/formatNumber'
+import { usePreferences } from '../../context/usePreferences'
 
 function ReadingGoalCard({ hasGoal, progress, onEdit }) {
+  const { t } = usePreferences()
   const progressLabel =
     progress.goal > 0
-      ? `${formatNumber(progress.progressBarPercentage)}٪`
-      : 'بدون درصد'
+      ? t('dashboard.goal.percentage', { value: formatNumber(progress.progressBarPercentage) })
+      : t('dashboard.goal.noPercentage')
 
   return (
     <article className="dashboard-panel reading-goal-card">
       <div className="dashboard-item-header">
         <div>
-          <h3>هدف مطالعه سالانه</h3>
+          <h3>{t('dashboard.annualGoalTitle')}</h3>
           {hasGoal ? (
-            <p>هدف سال {formatPlainNumber(progress.year)}: {formatNumber(progress.goal)} کتاب</p>
+            <p>{t('dashboard.goal.summary', {
+              goal: formatNumber(progress.goal),
+              year: formatPlainNumber(progress.year),
+            })}</p>
           ) : (
-            <p>هنوز برای امسال هدف مطالعه تعیین نکرده‌ای.</p>
+            <p>{t('dashboard.goal.empty')}</p>
           )}
         </div>
         <button className="button button-secondary" type="button" onClick={onEdit}>
-          ویرایش هدف
+          {t('dashboard.goal.edit')}
         </button>
       </div>
 
       <div
-        aria-label={`پیشرفت هدف مطالعه سالانه ${progressLabel}`}
+        aria-label={t('dashboard.goal.progressAria', { progress: progressLabel })}
         aria-valuemax="100"
         aria-valuemin="0"
         aria-valuenow={progress.progressBarPercentage}
@@ -35,16 +40,18 @@ function ReadingGoalCard({ hasGoal, progress, onEdit }) {
 
       <dl className="dashboard-inline-metrics">
         <div>
-          <dt>خوانده‌شده</dt>
-          <dd>{formatNumber(progress.finishedThisYear)} کتاب</dd>
+          <dt>{t('dashboard.goal.read')}</dt>
+          <dd>{t('dashboard.bookCount', { count: formatNumber(progress.finishedThisYear) })}</dd>
         </div>
         <div>
-          <dt>باقی‌مانده</dt>
-          <dd>{formatNumber(progress.remainingBooks)} کتاب</dd>
+          <dt>{t('dashboard.goal.remaining')}</dt>
+          <dd>{t('dashboard.bookCount', { count: formatNumber(progress.remainingBooks) })}</dd>
         </div>
         <div>
-          <dt>پیشرفت</dt>
-          <dd>{progress.goal > 0 ? `${formatNumber(progress.percentage)}٪` : 'هدف صفر است'}</dd>
+          <dt>{t('dashboard.goal.progress')}</dt>
+          <dd>{progress.goal > 0
+            ? t('dashboard.goal.percentage', { value: formatNumber(progress.percentage) })
+            : t('dashboard.goal.zero')}</dd>
         </div>
       </dl>
     </article>
