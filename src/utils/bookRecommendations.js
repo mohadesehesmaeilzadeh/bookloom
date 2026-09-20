@@ -3,6 +3,7 @@ import { RECOMMENDATION_MODE } from '../constants/recommendationModes'
 import { BOOK_STATUS } from '../constants/bookStatuses'
 import { formatNumber } from './formatNumber'
 import { normalizeSearchText } from './bookSearch'
+import { t } from '../i18n/localization'
 
 const eligibleStatuses = new Set([BOOK_STATUS.OWNED, BOOK_STATUS.PAUSED])
 
@@ -168,7 +169,7 @@ export function getRecommendationCategories(books) {
   return [...categories.values()].sort((a, b) => a.localeCompare(b, 'fa'))
 }
 
-export function getRandomRecommendation(eligibleBooks, previousBookId) {
+export function getRandomRecommendation(eligibleBooks, previousBookId, language) {
   const books = getEligibleRecommendationBooks(eligibleBooks)
 
   if (books.length === 0) {
@@ -184,11 +185,11 @@ export function getRandomRecommendation(eligibleBooks, previousBookId) {
   return {
     book,
     mode: RECOMMENDATION_MODE.RANDOM,
-    reasons: ['این گزینه به‌صورت محلی از میان کتاب‌های قابل پیشنهاد انتخاب شد.'],
+    reasons: [t('recommendation.reason.random', undefined, language)],
   }
 }
 
-export function getHighestPriorityRecommendation(eligibleBooks) {
+export function getHighestPriorityRecommendation(eligibleBooks, language) {
   const book = getEligibleRecommendationBooks(eligibleBooks).sort((a, b) => {
     const priorityDifference = comparePriority(a, b)
 
@@ -203,12 +204,12 @@ export function getHighestPriorityRecommendation(eligibleBooks) {
     ? {
         book,
         mode: RECOMMENDATION_MODE.HIGHEST_PRIORITY,
-        reasons: ['اولویت این کتاب نسبت به گزینه‌های دیگر بالاتر است.'],
+        reasons: [t('recommendation.reason.priority', undefined, language)],
       }
     : null
 }
 
-export function getOldestPurchaseRecommendation(eligibleBooks) {
+export function getOldestPurchaseRecommendation(eligibleBooks, language) {
   const book = getEligibleRecommendationBooks(eligibleBooks).sort((a, b) => {
     const purchaseDifference = compareOldestPurchase(a, b)
 
@@ -224,8 +225,8 @@ export function getOldestPurchaseRecommendation(eligibleBooks) {
   }
 
   const reasons = [book.purchaseDate
-    ? 'این کتاب از مدت بیشتری نسبت به بقیه در کتابخانه باقی مانده است.'
-    : 'تاریخ خرید معتبری پیدا نشد؛ قدیمی‌ترین تاریخ ثبت کتاب ملاک قرار گرفت.']
+    ? t('recommendation.reason.oldest', undefined, language)
+    : t('recommendation.reason.oldestCreated', undefined, language)]
 
   return {
     book,
@@ -234,14 +235,14 @@ export function getOldestPurchaseRecommendation(eligibleBooks) {
   }
 }
 
-export function getShortestBookRecommendation(eligibleBooks) {
+export function getShortestBookRecommendation(eligibleBooks, language) {
   const booksWithPages = getEligibleRecommendationBooks(eligibleBooks).filter(hasKnownPages)
 
   if (booksWithPages.length === 0) {
     return {
       book: null,
       mode: RECOMMENDATION_MODE.SHORTEST_BOOK,
-      message: 'هیچ کتاب قابل پیشنهادی با تعداد صفحه مشخص وجود ندارد.',
+      message: t('recommendation.message.noKnownPages', undefined, language),
       reasons: [],
     }
   }
@@ -259,18 +260,18 @@ export function getShortestBookRecommendation(eligibleBooks) {
   return {
     book,
     mode: RECOMMENDATION_MODE.SHORTEST_BOOK,
-    reasons: ['تعداد صفحات این کتاب نسبت به گزینه‌های قابل پیشنهاد کمتر است.'],
+    reasons: [t('recommendation.reason.shortest', undefined, language)],
   }
 }
 
-export function getCategoryRecommendation(eligibleBooks, category) {
+export function getCategoryRecommendation(eligibleBooks, category, language) {
   const normalizedCategory = normalizeCategory(category)
 
   if (!normalizedCategory) {
     return {
       book: null,
       mode: RECOMMENDATION_MODE.SELECTED_CATEGORY,
-      message: 'برای این روش باید یک دسته‌بندی انتخاب شود.',
+      message: t('recommendation.message.categoryRequired', undefined, language),
       reasons: [],
     }
   }
@@ -283,7 +284,7 @@ export function getCategoryRecommendation(eligibleBooks, category) {
     return {
       book: null,
       mode: RECOMMENDATION_MODE.SELECTED_CATEGORY,
-      message: 'در دسته‌بندی انتخاب‌شده کتاب قابل پیشنهادی پیدا نشد.',
+      message: t('recommendation.message.noCategoryMatch', undefined, language),
       reasons: [],
     }
   }
@@ -311,7 +312,7 @@ export function getCategoryRecommendation(eligibleBooks, category) {
   return {
     book,
     mode: RECOMMENDATION_MODE.SELECTED_CATEGORY,
-    reasons: ['این کتاب با دسته‌بندی انتخاب‌شده هماهنگ است.'],
+    reasons: [t('recommendation.reason.category', undefined, language)],
   }
 }
 
@@ -363,27 +364,27 @@ export function scoreRecommendationBook(book, options = {}) {
   const reasons = []
 
   if (scoreBreakdown.priority >= 30) {
-    reasons.push('اولویت این کتاب بالا است.')
+    reasons.push(t('recommendation.reason.weightPriority', undefined, options.language))
   }
 
   if (scoreBreakdown.purchaseAge > 0) {
-    reasons.push('این کتاب مدتی در کتابخانه مانده است.')
+    reasons.push(t('recommendation.reason.weightAge', undefined, options.language))
   }
 
   if (scoreBreakdown.bookLength > 0 && safePageCount(book.totalPages) <= 300) {
-    reasons.push('تعداد صفحات آن نسبتاً کم است.')
+    reasons.push(t('recommendation.reason.weightLength', undefined, options.language))
   }
 
   if (scoreBreakdown.preferredCategory > 0) {
-    reasons.push('با دسته‌بندی موردعلاقه انتخاب‌شده هماهنگ است.')
+    reasons.push(t('recommendation.reason.weightCategory', undefined, options.language))
   }
 
   if (scoreBreakdown.pausedStatus > 0) {
-    reasons.push('این کتاب قبلاً شروع شده و در حالت توقف قرار دارد.')
+    reasons.push(t('recommendation.reason.weightPaused', undefined, options.language))
   }
 
   if (reasons.length === 0) {
-    reasons.push('این کتاب با روش امتیازدهی ساده Bookloom مناسب‌ترین گزینه شد.')
+    reasons.push(t('recommendation.reason.weightFallback', undefined, options.language))
   }
 
   return {
@@ -420,35 +421,35 @@ export function getRecommendationForMode(eligibleBooks, options = {}) {
   const mode = options.mode ?? RECOMMENDATION_MODE.WEIGHTED
 
   if (mode === RECOMMENDATION_MODE.RANDOM) {
-    return getRandomRecommendation(eligibleBooks, options.previousBookId)
+    return getRandomRecommendation(eligibleBooks, options.previousBookId, options.language)
   }
 
   if (mode === RECOMMENDATION_MODE.HIGHEST_PRIORITY) {
-    return getHighestPriorityRecommendation(eligibleBooks)
+    return getHighestPriorityRecommendation(eligibleBooks, options.language)
   }
 
   if (mode === RECOMMENDATION_MODE.OLDEST_PURCHASE) {
-    return getOldestPurchaseRecommendation(eligibleBooks)
+    return getOldestPurchaseRecommendation(eligibleBooks, options.language)
   }
 
   if (mode === RECOMMENDATION_MODE.SHORTEST_BOOK) {
-    return getShortestBookRecommendation(eligibleBooks)
+    return getShortestBookRecommendation(eligibleBooks, options.language)
   }
 
   if (mode === RECOMMENDATION_MODE.SELECTED_CATEGORY) {
-    return getCategoryRecommendation(eligibleBooks, options.selectedCategory)
+    return getCategoryRecommendation(eligibleBooks, options.selectedCategory, options.language)
   }
 
   return getWeightedRecommendation(eligibleBooks, options)
 }
 
-export function createScoreBreakdownRows(scoreBreakdown = {}) {
+export function createScoreBreakdownRows(scoreBreakdown = {}, language) {
   return [
-    ['اولویت', scoreBreakdown.priority],
-    ['مدت حضور در کتابخانه', scoreBreakdown.purchaseAge],
-    ['تعداد صفحات', scoreBreakdown.bookLength],
-    ['دسته‌بندی انتخابی', scoreBreakdown.preferredCategory],
-    ['کتاب متوقف‌شده', scoreBreakdown.pausedStatus],
+    [t('recommendation.scorePriority', undefined, language), scoreBreakdown.priority],
+    [t('recommendation.scorePurchaseAge', undefined, language), scoreBreakdown.purchaseAge],
+    [t('recommendation.scoreBookLength', undefined, language), scoreBreakdown.bookLength],
+    [t('recommendation.scorePreferredCategory', undefined, language), scoreBreakdown.preferredCategory],
+    [t('recommendation.scorePausedStatus', undefined, language), scoreBreakdown.pausedStatus],
   ].filter(([, value]) => value > 0)
 }
 
