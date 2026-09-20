@@ -1,31 +1,24 @@
 import { useState } from 'react'
 import {
-  getCardStatusTransition,
-  getStatusTransitions,
+  getLocalizedCardStatusTransition,
+  getLocalizedStatusTransitions,
 } from '../../constants/bookStatusTransitions'
 import { useBooksContext } from '../../context/useBooksContext'
+import { usePreferences } from '../../context/usePreferences'
 import { createStatusTransitionUpdates } from '../../utils/applyBookStatusTransition'
 import ConfirmDialog from '../common/ConfirmDialog'
 
-const actionFeedbackMessages = {
-  'start-reading': 'مطالعه کتاب شروع شد.',
-  'pause-reading': 'مطالعه کتاب موقتاً متوقف شد.',
-  'resume-reading': 'مطالعه کتاب ادامه پیدا کرد.',
-  'finish-reading': 'کتاب به‌عنوان تمام‌شده ثبت شد.',
-  'abandon-book': 'کتاب به‌عنوان رهاشده ثبت شد.',
-  'return-to-library': 'کتاب به کتابخانه بازگردانده شد.',
-}
-
 function BookStatusActions({ book, compact = false, onComplete }) {
   const { updateBook } = useBooksContext()
+  const { language, t } = usePreferences()
   const [pendingTransition, setPendingTransition] = useState(null)
   const transitions = compact
-    ? [getCardStatusTransition(book.status)].filter(Boolean)
-    : getStatusTransitions(book.status)
+    ? [getLocalizedCardStatusTransition(book.status, language.value)].filter(Boolean)
+    : getLocalizedStatusTransitions(book.status, language.value)
 
   if (transitions.length === 0) {
     return compact ? null : (
-      <p className="muted-note">برای وضعیت فعلی این کتاب اقدام مستقیمی وجود ندارد.</p>
+      <p className="muted-note">{t('books.noStatusActions')}</p>
     )
   }
 
@@ -34,7 +27,7 @@ function BookStatusActions({ book, compact = false, onComplete }) {
     const result = updateBook(book.id, updates)
 
     if (result.success) {
-      onComplete?.(actionFeedbackMessages[transition.action])
+      onComplete?.(t(`statusAction.${transition.action}.feedback`))
     }
   }
 
