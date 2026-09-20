@@ -1,4 +1,5 @@
 import { generateId } from './generateId'
+import { t } from '../i18n/localization'
 
 function isRecord(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value)
@@ -80,20 +81,20 @@ export function normalizeQuotes(quotes, options = {}) {
   }, [])
 }
 
-export function validateQuoteInput(values) {
+export function validateQuoteInput(values, language) {
   const errors = {}
   const text = normalizeString(values.text)
   const pageNumber = values.pageNumber === '' ? '' : Number(values.pageNumber)
 
   if (!text) {
-    errors.text = 'متن نقل‌قول الزامی است.'
+    errors.text = t('quotes.validation.textRequired', undefined, language)
   }
 
   if (values.pageNumber !== '') {
     if (!Number.isFinite(pageNumber)) {
-      errors.pageNumber = 'مقدار شماره صفحه معتبر نیست.'
+      errors.pageNumber = t('quotes.validation.pageInvalid', undefined, language)
     } else if (pageNumber < 0) {
-      errors.pageNumber = 'شماره صفحه نمی‌تواند منفی باشد.'
+      errors.pageNumber = t('quotes.validation.pageNegative', undefined, language)
     }
   }
 
