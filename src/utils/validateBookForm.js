@@ -3,6 +3,7 @@ import {
   bookPriorityValues,
 } from '../constants/bookPriorities'
 import { DEFAULT_BOOK_STATUS, bookStatusValues } from '../constants/bookStatuses'
+import { t } from '../i18n/localization'
 
 export const emptyBookFormValues = {
   title: '',
@@ -21,9 +22,9 @@ export const emptyBookFormValues = {
 }
 
 const numericFieldMessages = {
-  totalPages: 'تعداد صفحات نمی‌تواند منفی باشد.',
-  price: 'قیمت نمی‌تواند منفی باشد.',
-  expectedPrice: 'قیمت نمی‌تواند منفی باشد.',
+  totalPages: 'validation.book.totalPagesNonNegative',
+  price: 'validation.book.priceNonNegative',
+  expectedPrice: 'validation.book.priceNonNegative',
 }
 
 function toInputNumber(value) {
@@ -68,25 +69,25 @@ export function getInitialBookFormValues(book) {
   }
 }
 
-export function validateBookForm(values) {
+export function validateBookForm(values, language) {
   const errors = {}
 
   if (!values.title.trim()) {
-    errors.title = 'نام کتاب الزامی است.'
+    errors.title = t('validation.book.titleRequired', undefined, language)
   }
 
   for (const field of ['totalPages', 'price', 'expectedPrice']) {
     if (validateNonNegativeNumber(values[field]) === 'invalid') {
-      errors[field] = numericFieldMessages[field]
+      errors[field] = t(numericFieldMessages[field], undefined, language)
     }
   }
 
   if (!bookStatusValues.includes(values.status)) {
-    errors.status = 'وضعیت انتخاب‌شده معتبر نیست.'
+    errors.status = t('validation.book.statusInvalid', undefined, language)
   }
 
   if (!bookPriorityValues.includes(values.priority)) {
-    errors.priority = 'اولویت انتخاب‌شده معتبر نیست.'
+    errors.priority = t('validation.book.priorityInvalid', undefined, language)
   }
 
   return errors
