@@ -1,9 +1,13 @@
-import { accentColorOptions } from '../../constants/accentColors'
+import { getAccentColorOptions } from '../../constants/accentColors'
+import { usePreferences } from '../../context/usePreferences'
 
 function AccentColorSelector({ selectedAccentColor, onChange }) {
+  const { language, t } = usePreferences()
+  const accentColorOptions = getAccentColorOptions(language.value)
+
   return (
     <fieldset className="settings-option-group">
-      <legend>رنگ اصلی</legend>
+      <legend>{t('settings.accentLegend')}</legend>
       <div className="accent-color-grid">
         {accentColorOptions.map((accentColor) => (
           <label className="accent-color-option" key={accentColor.value}>
