@@ -1,11 +1,13 @@
 import { formatNumber } from '../../utils/formatNumber'
+import { usePreferences } from '../../context/usePreferences'
 
 function BookRating({ disabled = false, onChange, rating = 0, readOnly = false }) {
+  const { t } = usePreferences()
   const normalizedRating = Math.max(0, Math.min(5, Math.floor(Number(rating) || 0)))
 
   return (
     <div className="book-rating">
-      <div className="rating-stars" role={readOnly ? undefined : 'group'} aria-label="امتیاز کتاب">
+      <div className="rating-stars" role={readOnly ? undefined : 'group'} aria-label={t('rating.label')}>
         {[1, 2, 3, 4, 5].map((value) => {
           const isActive = value <= normalizedRating
 
@@ -19,7 +21,10 @@ function BookRating({ disabled = false, onChange, rating = 0, readOnly = false }
 
           return (
             <button
-              aria-label={`ثبت امتیاز ${formatNumber(value)} از ${formatNumber(5)}`}
+              aria-label={t('rating.set', {
+                total: formatNumber(5),
+                value: formatNumber(value),
+              })}
               aria-pressed={normalizedRating === value}
               className={isActive ? 'rating-star active' : 'rating-star'}
               disabled={disabled}
@@ -34,8 +39,11 @@ function BookRating({ disabled = false, onChange, rating = 0, readOnly = false }
       </div>
       <p>
         {normalizedRating > 0
-          ? `${formatNumber(normalizedRating)} از ${formatNumber(5)}`
-          : 'بدون امتیاز'}
+          ? t('rating.value', {
+              total: formatNumber(5),
+              value: formatNumber(normalizedRating),
+            })
+          : t('rating.none')}
       </p>
       {!readOnly && normalizedRating > 0 ? (
         <button
@@ -44,7 +52,7 @@ function BookRating({ disabled = false, onChange, rating = 0, readOnly = false }
           type="button"
           onClick={() => onChange?.(0)}
         >
-          حذف امتیاز
+          {t('rating.clear')}
         </button>
       ) : null}
     </div>
