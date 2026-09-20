@@ -1,4 +1,5 @@
 import { MAX_BACKUP_FILE_SIZE_BYTES } from '../../constants/backupSchema'
+import { usePreferences } from '../../context/usePreferences'
 import BackupPreview from './BackupPreview'
 import RestoreModeSelector from './RestoreModeSelector'
 
@@ -16,16 +17,18 @@ function BackupImportSection({
   validationResult,
   warnings,
 }) {
+  const { t } = usePreferences()
+
   return (
     <section className="settings-section" aria-labelledby="backup-import-title">
       <div>
-        <h2 id="backup-import-title">بازیابی اطلاعات</h2>
-        <p>فایل JSON پشتیبان را انتخاب کن، پیش‌نمایش را ببین و سپس روش بازیابی را تأیید کن.</p>
+        <h2 id="backup-import-title">{t('backup.importTitle')}</h2>
+        <p>{t('backup.importDescription')}</p>
       </div>
 
       <div className="settings-card">
         <label className="form-field">
-          <span>انتخاب فایل پشتیبان</span>
+          <span>{t('backup.fileLabel')}</span>
           <input
             accept=".json,application/json"
             ref={fileInputRef}
@@ -34,7 +37,9 @@ function BackupImportSection({
           />
         </label>
         <p className="muted-note">
-          حداکثر اندازه فایل: {Math.floor(MAX_BACKUP_FILE_SIZE_BYTES / 1024 / 1024)} مگابایت
+          {t('backup.maxSize', {
+            size: Math.floor(MAX_BACKUP_FILE_SIZE_BYTES / 1024 / 1024),
+          })}
         </p>
         {fileName ? <p className="selected-file-name">{fileName}</p> : null}
 
