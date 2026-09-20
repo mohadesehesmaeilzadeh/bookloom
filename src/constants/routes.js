@@ -1,3 +1,5 @@
+import { t } from '../i18n/localization'
+
 export const ROUTES = {
   DASHBOARD: '/',
   LIBRARY: '/library',
@@ -12,46 +14,54 @@ export const ROUTES = {
 export const routeTitles = [
   {
     path: ROUTES.DASHBOARD,
-    title: 'داشبورد',
-    eyebrow: 'نمای کلی',
+    titleKey: 'route.dashboard.title',
+    eyebrowKey: 'route.dashboard.eyebrow',
     end: true,
   },
   {
     path: ROUTES.LIBRARY,
-    title: 'کتابخانه من',
-    eyebrow: 'کتاب‌ها',
+    titleKey: 'route.library.title',
+    eyebrowKey: 'route.library.eyebrow',
   },
   {
     path: ROUTES.READING,
-    title: 'در حال مطالعه',
-    eyebrow: 'مطالعه',
+    titleKey: 'route.reading.title',
+    eyebrowKey: 'route.reading.eyebrow',
   },
   {
     path: ROUTES.WISHLIST,
-    title: 'لیست خرید',
-    eyebrow: 'خرید',
+    titleKey: 'route.wishlist.title',
+    eyebrowKey: 'route.wishlist.eyebrow',
   },
   {
     path: ROUTES.FINISHED,
-    title: 'کتاب‌های تمام‌شده',
-    eyebrow: 'پایان مطالعه',
+    titleKey: 'route.finished.title',
+    eyebrowKey: 'route.finished.eyebrow',
   },
   {
     path: ROUTES.STATISTICS,
-    title: 'آمار مطالعه',
-    eyebrow: 'آمار',
+    titleKey: 'route.statistics.title',
+    eyebrowKey: 'route.statistics.eyebrow',
   },
   {
     path: ROUTES.SETTINGS,
-    title: 'تنظیمات',
-    eyebrow: 'پیکربندی',
+    titleKey: 'route.settings.title',
+    eyebrowKey: 'route.settings.eyebrow',
   },
   {
     path: ROUTES.BOOK_DETAILS,
-    title: 'جزئیات کتاب',
-    eyebrow: 'کتاب',
+    titleKey: 'route.bookDetails.title',
+    eyebrowKey: 'route.bookDetails.eyebrow',
   },
 ]
+
+export function getRouteTitles(language) {
+  return routeTitles.map((route) => ({
+    ...route,
+    eyebrow: t(route.eyebrowKey, undefined, language),
+    title: t(route.titleKey, undefined, language),
+  }))
+}
 
 export function getBookDetailsPath(bookId) {
   return `/books/${encodeURIComponent(bookId)}`
