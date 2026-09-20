@@ -6,6 +6,7 @@ import { normalizeBook } from './bookValidation'
 import { getBackupSummary } from './backupSummary'
 import { normalizePreferences } from './preferenceValidation'
 import { normalizeReadingGoals } from './readingGoalStorage'
+import { t } from '../i18n/localization'
 
 function isRecord(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value)
@@ -38,7 +39,7 @@ function sanitizeBook(value) {
   }
 }
 
-export function parseBackupFileContent(content) {
+export function parseBackupFileContent(content, language) {
   try {
     return {
       parsed: JSON.parse(content),
@@ -46,20 +47,20 @@ export function parseBackupFileContent(content) {
     }
   } catch {
     return {
-      error: 'فایل انتخاب‌شده JSON معتبر نیست.',
+      error: t('backup.validation.invalidJson', undefined, language),
       parsed: null,
       success: false,
     }
   }
 }
 
-export function validateBackupStructure(parsedBackup) {
+export function validateBackupStructure(parsedBackup, language) {
   const errors = []
   const warnings = []
 
   if (!isRecord(parsedBackup)) {
     return {
-      errors: ['ساختار فایل پشتیبان معتبر نیست.'],
+      errors: [t('backup.validation.invalidStructure', undefined, language)],
       normalizedBackup: null,
       valid: false,
       warnings,
@@ -67,27 +68,27 @@ export function validateBackupStructure(parsedBackup) {
   }
 
   if (parsedBackup.app !== BACKUP_APP_NAME) {
-    errors.push('این فایل پشتیبان متعلق به Bookloom نیست.')
+    errors.push(t('backup.validation.wrongApp', undefined, language))
   }
 
   if (!Number.isInteger(parsedBackup.schemaVersion) || parsedBackup.schemaVersion <= 0) {
-    errors.push('نسخه فایل پشتیبان معتبر نیست.')
+    errors.push(t('backup.validation.invalidVersion', undefined, language))
   } else if (parsedBackup.schemaVersion > CURRENT_BACKUP_SCHEMA_VERSION) {
-    errors.push('نسخه این فایل پشتیبان توسط نسخه فعلی Bookloom پشتیبانی نمی‌شود.')
+    errors.push(t('backup.validation.futureVersion', undefined, language))
   } else if (parsedBackup.schemaVersion < 1) {
-    errors.push('نسخه قدیمی این فایل پشتیبان بدون مهاجرت ایمن پشتیبانی نمی‌شود.')
+    errors.push(t('backup.validation.oldVersion', undefined, language))
   }
 
   if (!isValidTimestamp(parsedBackup.exportedAt)) {
-    errors.push('تاریخ خروجی گرفتن فایل پشتیبان معتبر نیست.')
+    errors.push(t('backup.validation.invalidDate', undefined, language))
   }
 
   if (!isRecord(parsedBackup.data)) {
-    errors.push('بخش اطلاعات فایل پشتیبان معتبر نیست.')
+    errors.push(t('backup.validation.invalidData', undefined, language))
   }
 
   if (!Array.isArray(parsedBackup.data?.books)) {
-    errors.push('فهرست کتاب‌های فایل پشتیبان معتبر نیست.')
+    errors.push(t('backup.validation.invalidBooks', undefined, language))
   }
 
   if (errors.length > 0) {
@@ -103,7 +104,7 @@ export function validateBackupStructure(parsedBackup) {
   const validBookRecords = rawBooks.filter(isRecord).map(sanitizeBook)
 
   if (validBookRecords.length < rawBooks.length) {
-    warnings.push('برخی رکوردهای نامعتبر کتاب نادیده گرفته شدند.')
+    warnings.push(t('backup.validation.skippedBooks', undefined, language))
   }
 
   const normalizedBooks = validBookRecords.map((book) => normalizeBook(book))
@@ -119,7 +120,7 @@ export function validateBackupStructure(parsedBackup) {
   }
 
   if (duplicateBookIds.size > 0) {
-    warnings.push('فایل پشتیبان شامل شناسه تکراری کتاب است؛ هنگام بازیابی نسخه جدیدتر نگه داشته می‌شود.')
+    warnings.push(t('backup.validation.duplicateBooks', undefined, language))
   }
   const readingGoals = normalizeReadingGoals(parsedBackup.data.readingGoals)
   const preferences = normalizePreferences(
@@ -151,6 +152,6 @@ export function validateBackupStructure(parsedBackup) {
   }
 }
 
-export function normalizeBackupData(parsedBackup) {
-  return validateBackupStructure(parsedBackup)
+export function normalizeBackupData(parsedBackup, language) {
+  return validateBackupStructure(parsedBackup, language)
 }
