@@ -3,6 +3,8 @@ import { getBookPriorityLabel } from '../../constants/bookPriorities'
 import { BOOK_STATUS, getBookStatusLabel } from '../../constants/bookStatuses'
 import { getBookDetailsPath } from '../../constants/routes'
 import { formatPrice } from '../../utils/formatPrice'
+import { formatNumber } from '../../utils/formatNumber'
+import { usePreferences } from '../../context/usePreferences'
 import BookStatusActions from './BookStatusActions'
 import BookRating from './BookRating'
 import ReadingProgressBar from './ReadingProgressBar'
@@ -15,6 +17,7 @@ function BookListItem({
   onStatusChange,
   showProgressDetails = false,
 }) {
+  const { language, t } = usePreferences()
   const showProgress =
     book.status === BOOK_STATUS.READING ||
     book.status === BOOK_STATUS.PAUSED ||
@@ -25,14 +28,14 @@ function BookListItem({
       <div className="list-main">
         <h3>{book.title}</h3>
         <p>
-          {[book.author, book.category, getBookStatusLabel(book.status)]
+          {[book.author, book.category, getBookStatusLabel(book.status, language.value)]
             .filter(Boolean)
             .join(' · ')}
         </p>
-        <span>{getBookPriorityLabel(book.priority)}</span>
+        <span>{getBookPriorityLabel(book.priority, language.value)}</span>
         {book.rating > 0 ? <BookRating rating={book.rating} readOnly /> : null}
         {book.status === BOOK_STATUS.FINISHED && book.quotes?.length > 0 ? (
-          <span>{book.quotes.length.toLocaleString('fa-IR')} نقل‌قول</span>
+          <span>{t('bookFields.quotesCount', { count: formatNumber(book.quotes.length) })}</span>
         ) : null}
       </div>
 
@@ -51,13 +54,13 @@ function BookListItem({
 
       <div className="book-card-actions">
         <Link className="button button-ghost" to={getBookDetailsPath(book.id)}>
-          مشاهده
+          {t('common.view')}
         </Link>
         <button className="button button-secondary" type="button" onClick={() => onEdit(book)}>
-          ویرایش
+          {t('common.edit')}
         </button>
         <button className="button button-danger-soft" type="button" onClick={() => onDelete(book)}>
-          حذف
+          {t('common.delete')}
         </button>
       </div>
 
@@ -68,7 +71,7 @@ function BookListItem({
             type="button"
             onClick={() => onProgressUpdate?.(book)}
           >
-            به‌روزرسانی پیشرفت
+            {t('books.updateProgress')}
           </button>
           <BookStatusActions book={book} compact onComplete={onStatusChange} />
         </div>
