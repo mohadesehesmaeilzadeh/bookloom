@@ -1,4 +1,5 @@
 import { bookPriorityByValue } from '../../constants/bookPriorities'
+import { t } from '../../i18n/localization'
 
 export const WISHLIST_SORT = {
   PRIORITY: 'priority',
@@ -12,29 +13,36 @@ export const WISHLIST_SORT = {
 export const wishlistSortOptions = [
   {
     value: WISHLIST_SORT.PRIORITY,
-    label: 'بالاترین اولویت',
+    labelKey: 'wishlist.sort.priority',
   },
   {
     value: WISHLIST_SORT.NEWEST,
-    label: 'جدیدترین',
+    labelKey: 'wishlist.sort.newest',
   },
   {
     value: WISHLIST_SORT.OLDEST,
-    label: 'قدیمی‌ترین',
+    labelKey: 'wishlist.sort.oldest',
   },
   {
     value: WISHLIST_SORT.PRICE_ASC,
-    label: 'کمترین قیمت تقریبی',
+    labelKey: 'wishlist.sort.priceAsc',
   },
   {
     value: WISHLIST_SORT.PRICE_DESC,
-    label: 'بیشترین قیمت تقریبی',
+    labelKey: 'wishlist.sort.priceDesc',
   },
   {
     value: WISHLIST_SORT.TITLE,
-    label: 'نام کتاب',
+    labelKey: 'wishlist.sort.title',
   },
 ]
+
+export function getWishlistSortOptions(language) {
+  return wishlistSortOptions.map((option) => ({
+    ...option,
+    label: t(option.labelKey, undefined, language),
+  }))
+}
 
 function priorityRank(book) {
   return bookPriorityByValue[book.priority]?.rank ?? Number.MAX_SAFE_INTEGER
