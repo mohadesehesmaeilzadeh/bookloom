@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { BOOK_SORT, bookSortOptions } from '../../constants/bookSortOptions'
+import { BOOK_SORT, bookSortOptions, localizeBookSortOptions } from '../../constants/bookSortOptions'
 import { VIEW_MODE } from '../../constants/viewModes'
 import { useBookCollectionControls } from '../../hooks/useBookCollectionControls'
 import BookFormModal from './BookFormModal'
@@ -13,7 +13,7 @@ import { useBooksContext } from '../../context/useBooksContext'
 import { usePreferences } from '../../context/usePreferences'
 
 function BookCollectionView({
-  addButtonLabel = 'افزودن کتاب',
+  addButtonLabel,
   allowCreate = false,
   books,
   description,
@@ -22,8 +22,8 @@ function BookCollectionView({
   emptyTitle,
   enabledFilters = [],
   initialSort = BOOK_SORT.NEWEST,
-  noResultsDescription = 'جست‌وجو یا فیلترها را تغییر بده.',
-  noResultsTitle = 'کتابی با این جست‌وجو یا فیلترها پیدا نشد.',
+  noResultsDescription,
+  noResultsTitle,
   renderHeaderActions,
   showProgressDetails = false,
   sortOptions = bookSortOptions,
@@ -31,7 +31,7 @@ function BookCollectionView({
   title,
 }) {
   const { addBook, deleteBook, updateBook } = useBooksContext()
-  const { preferences } = usePreferences()
+  const { language, preferences, t } = usePreferences()
   const [formState, setFormState] = useState({ book: null, mode: null })
   const [progressBook, setProgressBook] = useState(null)
   const [deleteCandidate, setDeleteCandidate] = useState(null)
@@ -43,6 +43,11 @@ function BookCollectionView({
     storageNamespace,
   })
   const isFormOpen = Boolean(formState.mode)
+  const localizedAddButtonLabel = addButtonLabel ?? t('books.addBook')
+  const localizedNoResultsDescription =
+    noResultsDescription ?? t('collection.noResultsDescription')
+  const localizedNoResultsTitle = noResultsTitle ?? t('collection.noResultsTitle')
+  const localizedSortOptions = localizeBookSortOptions(sortOptions, language.value)
 
   const dismissFeedback = useCallback(() => setFeedback(''), [])
 
@@ -63,11 +68,11 @@ function BookCollectionView({
       const result = updateBook(formState.book.id, payload)
 
       if (result.success) {
-        setFeedback('تغییرات کتاب ذخیره شد.')
+        setFeedback(t('books.bookChangesSaved'))
       }
     } else {
       addBook(payload)
-      setFeedback('کتاب با موفقیت اضافه شد.')
+      setFeedback(t('books.bookAdded'))
     }
 
     closeForm()
@@ -83,7 +88,7 @@ function BookCollectionView({
     setIsDeleting(false)
 
     if (result.success) {
-      setFeedback('کتاب حذف شد.')
+      setFeedback(t('books.bookDeleted'))
       setDeleteCandidate(null)
     }
   }
@@ -97,7 +102,7 @@ function BookCollectionView({
     const result = deleteBook(book.id)
 
     if (result.success) {
-      setFeedback('کتاب حذف شد.')
+      setFeedback(t('books.bookDeleted'))
     }
   }
 
@@ -112,7 +117,7 @@ function BookCollectionView({
           {renderHeaderActions?.({ setFeedback })}
           {allowCreate ? (
             <button className="button button-primary" type="button" onClick={openCreateForm}>
-              {addButtonLabel}
+              {localizedAddButtonLabel}
             </button>
           ) : null}
         </div>
@@ -125,7 +130,7 @@ function BookCollectionView({
           books={books}
           controls={controls}
           enabledFilters={enabledFilters}
-          sortOptions={sortOptions}
+          sortOptions={localizedSortOptions}
         />
       ) : null}
 
@@ -135,20 +140,20 @@ function BookCollectionView({
           <p>{emptyDescription}</p>
           {allowCreate ? (
             <button className="button button-primary" type="button" onClick={openCreateForm}>
-              {emptyActionLabel ?? addButtonLabel}
+              {emptyActionLabel ?? localizedAddButtonLabel}
             </button>
           ) : null}
         </div>
       ) : controls.visibleBooks.length === 0 ? (
         <div className="empty-state">
-          <h3>{noResultsTitle}</h3>
-          <p>{noResultsDescription}</p>
+          <h3>{localizedNoResultsTitle}</h3>
+          <p>{localizedNoResultsDescription}</p>
           <button
             className="button button-primary"
             type="button"
             onClick={controls.clearControls}
           >
-            پاک کردن فیلترها
+            {t('common.clearFilters')}
           </button>
         </div>
       ) : controls.viewMode === VIEW_MODE.LIST ? (
@@ -180,15 +185,15 @@ function BookCollectionView({
       />
 
       <ConfirmDialog
-        confirmLabel="حذف کتاب"
+        confirmLabel={t('books.deleteBook')}
         isConfirming={isDeleting}
         isOpen={Boolean(deleteCandidate)}
         message={
           deleteCandidate
-            ? `آیا از حذف کتاب «${deleteCandidate.title}» مطمئن هستید؟ این کار قابل بازگشت نیست.`
+            ? t('books.deleteBookMessage', { title: deleteCandidate.title })
             : ''
         }
-        title="حذف کتاب"
+        title={t('books.deleteBook')}
         onCancel={() => setDeleteCandidate(null)}
         onConfirm={handleConfirmDelete}
       />
