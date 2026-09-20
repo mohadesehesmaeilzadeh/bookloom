@@ -15,6 +15,7 @@ import StatisticCard from '../components/dashboard/StatisticCard'
 import RecommendationEntryCard from '../components/recommendations/RecommendationEntryCard'
 import { ROUTES } from '../constants/routes'
 import { useBooksContext } from '../context/useBooksContext'
+import { usePreferences } from '../context/usePreferences'
 import { useReadingGoal } from '../hooks/useReadingGoal'
 import {
   getAnnualGoalProgress,
@@ -28,9 +29,11 @@ import {
   getRecentFinishedBooks,
 } from '../utils/dashboardStatistics'
 import { getDailyBookQuote } from '../utils/bookQuotes'
+import { formatNumber } from '../utils/formatNumber'
 
 function DashboardPage() {
   const { books } = useBooksContext()
+  const { language, t } = usePreferences()
   const currentYear = new Date().getFullYear()
   const { annualGoal, hasAnnualGoal, saveAnnualGoal, year } = useReadingGoal(currentYear)
   const [progressBook, setProgressBook] = useState(null)
@@ -43,13 +46,13 @@ function DashboardPage() {
       continueReadingBook: getContinueReadingBook(books),
       monthlyFinished: getBooksFinishedByMonth(books, currentYear),
       pagesSummary: getReadingPagesSummary(books),
-      recentActivity: getRecentActivity(books),
+      recentActivity: getRecentActivity(books, 5, language.value),
       recentBooks: getRecentBooks(books),
       recentFinishedBooks: getRecentFinishedBooks(books),
       dailyQuote: getDailyBookQuote(books),
       summary: getDashboardSummary(books),
     }),
-    [books, currentYear],
+    [books, currentYear, language.value],
   )
   const annualGoalProgress = useMemo(
     () => getAnnualGoalProgress(books, annualGoal, year),
@@ -58,41 +61,43 @@ function DashboardPage() {
   const hasBooks = books.length > 0
   const summaryCards = [
     {
-      description: 'همه رکوردها، شامل کتابخانه و لیست خرید',
+      description: t('dashboard.totalBooks.description'),
       link: ROUTES.LIBRARY,
-      title: 'کل کتاب‌ها',
+      title: t('dashboard.totalBooks.title'),
       value: dashboardData.summary.totalBooks,
     },
     {
-      description: 'کتاب‌های متعلق به کتابخانه، بدون لیست خرید',
+      description: t('dashboard.libraryBooks.description'),
       link: ROUTES.LIBRARY,
-      title: 'کتاب‌های کتابخانه',
+      title: t('dashboard.libraryBooks.title'),
       value: dashboardData.summary.libraryBooks,
     },
     {
       description:
         dashboardData.summary.pausedBooks > 0
-          ? `${dashboardData.summary.pausedBooks.toLocaleString('fa-IR')} کتاب متوقف‌شده`
-          : 'کتاب‌هایی که اکنون در حال خواندن هستند',
+          ? t('dashboard.pausedBooksDescription', {
+              count: formatNumber(dashboardData.summary.pausedBooks),
+            })
+          : t('dashboard.readingBooks.description'),
       link: ROUTES.READING,
-      title: 'در حال مطالعه',
+      title: t('dashboard.readingBooks.title'),
       value: dashboardData.summary.readingBooks,
     },
     {
-      description: 'کتاب‌هایی که تاریخ پایان مطالعه دارند در آمار سالانه هم بررسی می‌شوند',
+      description: t('dashboard.finishedBooks.description'),
       link: ROUTES.FINISHED,
-      title: 'تمام‌شده‌ها',
+      title: t('dashboard.finishedBooks.title'),
       value: dashboardData.summary.finishedBooks,
     },
     {
-      description: 'کتاب‌هایی که هنوز خریداری نشده‌اند',
+      description: t('dashboard.wishlistBooks.description'),
       link: ROUTES.WISHLIST,
-      title: 'لیست خرید',
+      title: t('dashboard.wishlistBooks.title'),
       value: dashboardData.summary.wishlistBooks,
     },
     {
-      description: 'برآوردی از صفحات خوانده‌شده بر اساس وضعیت فعلی کتاب‌ها',
-      title: 'مجموع صفحات خوانده‌شده',
+      description: t('dashboard.totalReadPages.description'),
+      title: t('dashboard.totalReadPages.title'),
       value: dashboardData.summary.totalReadPages,
     },
   ]
@@ -100,35 +105,34 @@ function DashboardPage() {
   function handleGoalSubmit(goal) {
     saveAnnualGoal(goal)
     setIsGoalModalOpen(false)
-    setFeedback('هدف مطالعه سالانه ذخیره شد.')
+    setFeedback(t('dashboard.goalSaved'))
   }
 
   return (
     <section className="dashboard-page" aria-labelledby="dashboard-title">
       <div className="dashboard-intro">
-        <h2 id="dashboard-title">داشبورد Bookloom</h2>
+        <h2 id="dashboard-title">{t('dashboard.title')}</h2>
         <p>
-          نمایی فشرده از کتابخانه، پیشرفت مطالعه، هدف سالانه و فعالیت‌های اخیر بر اساس داده‌های
-          ذخیره‌شده فعلی.
+          {t('dashboard.description')}
         </p>
       </div>
 
       {!hasBooks ? (
         <div className="empty-state dashboard-onboarding">
-          <h3>هنوز کتابی در Bookloom ثبت نکرده‌ای.</h3>
-          <p>اولین کتابت را به کتابخانه یا لیست خرید اضافه کن.</p>
+          <h3>{t('dashboard.emptyTitle')}</h3>
+          <p>{t('dashboard.emptyDescription')}</p>
           <div className="form-actions">
             <Link className="button button-primary" to={ROUTES.LIBRARY}>
-              رفتن به کتابخانه
+              {t('dashboard.goLibrary')}
             </Link>
             <Link className="button button-secondary" to={ROUTES.WISHLIST}>
-              رفتن به لیست خرید
+              {t('dashboard.goWishlist')}
             </Link>
           </div>
         </div>
       ) : null}
 
-      <div className="dashboard-grid" aria-label="خلاصه وضعیت کتاب‌ها">
+      <div className="dashboard-grid" aria-label={t('dashboard.summaryAria')}>
         {summaryCards.map((card) => (
           <StatisticCard
             description={card.description}
@@ -145,8 +149,8 @@ function DashboardPage() {
       <section className="dashboard-section" aria-labelledby="continue-reading-title">
         <div className="library-header">
           <div>
-            <h2 id="continue-reading-title">ادامه مطالعه</h2>
-            <p>مناسب‌ترین کتاب برای ادامه بر اساس وضعیت و آخرین فعالیت مطالعه انتخاب می‌شود.</p>
+            <h2 id="continue-reading-title">{t('dashboard.continueReadingTitle')}</h2>
+            <p>{t('dashboard.continueReadingDescription')}</p>
           </div>
         </div>
         <ContinueReadingCard
@@ -158,8 +162,8 @@ function DashboardPage() {
       <section className="dashboard-section" aria-labelledby="annual-goal-title">
         <div className="library-header">
           <div>
-            <h2 id="annual-goal-title">هدف مطالعه سالانه</h2>
-            <p>فقط کتاب‌های تمام‌شده با تاریخ پایان معتبر در سال جاری شمرده می‌شوند.</p>
+            <h2 id="annual-goal-title">{t('dashboard.annualGoalTitle')}</h2>
+            <p>{t('dashboard.annualGoalDescription')}</p>
           </div>
         </div>
         <ReadingGoalCard
@@ -179,15 +183,15 @@ function DashboardPage() {
         <RecentBooksList
           books={dashboardData.recentBooks}
           dateField="createdAt"
-          emptyMessage="هنوز کتابی اضافه نشده است."
-          title="کتاب‌های تازه اضافه‌شده"
+          emptyMessage={t('dashboard.recentAddedEmpty')}
+          title={t('dashboard.recentAddedTitle')}
         />
         <RecentBooksList
           books={dashboardData.recentFinishedBooks}
           dateField="readingEndDate"
-          emptyMessage="هنوز کتاب تمام‌شده‌ای با تاریخ پایان معتبر ثبت نشده است."
+          emptyMessage={t('dashboard.recentFinishedEmpty')}
           showPages
-          title="کتاب‌های تازه تمام‌شده"
+          title={t('dashboard.recentFinishedTitle')}
         />
       </div>
 
