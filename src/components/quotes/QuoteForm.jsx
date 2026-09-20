@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { usePreferences } from '../../context/usePreferences'
 import { validateQuoteInput } from '../../utils/quoteValidation'
 
 function getInitialValues(quote) {
@@ -10,6 +11,7 @@ function getInitialValues(quote) {
 }
 
 function QuoteForm({ mode = 'create', onCancel, onSubmit, quote }) {
+  const { language, t } = usePreferences()
   const [values, setValues] = useState(() => getInitialValues(quote))
   const [errors, setErrors] = useState({})
   const [wasSubmitted, setWasSubmitted] = useState(false)
@@ -25,7 +27,7 @@ function QuoteForm({ mode = 'create', onCancel, onSubmit, quote }) {
     setValues(nextValues)
 
     if (wasSubmitted || errors[field]) {
-      setErrors(validateQuoteInput(nextValues))
+      setErrors(validateQuoteInput(nextValues, language.value))
     }
   }
 
@@ -33,7 +35,7 @@ function QuoteForm({ mode = 'create', onCancel, onSubmit, quote }) {
     event.preventDefault()
     setWasSubmitted(true)
 
-    const nextErrors = validateQuoteInput(values)
+    const nextErrors = validateQuoteInput(values, language.value)
     setErrors(nextErrors)
 
     if (Object.keys(nextErrors).length > 0) {
@@ -50,7 +52,7 @@ function QuoteForm({ mode = 'create', onCancel, onSubmit, quote }) {
   return (
     <form className="book-form quote-form" noValidate onSubmit={handleSubmit}>
       <label className="form-field">
-        <span>متن نقل‌قول</span>
+        <span>{t('quotes.text')}</span>
         <textarea
           aria-describedby={errors.text ? 'quote-text-error' : undefined}
           aria-invalid={errors.text ? 'true' : 'false'}
@@ -65,7 +67,7 @@ function QuoteForm({ mode = 'create', onCancel, onSubmit, quote }) {
       </label>
 
       <label className="form-field">
-        <span>شماره صفحه</span>
+        <span>{t('quotes.pageNumber')}</span>
         <input
           aria-describedby={errors.pageNumber ? 'quote-page-error' : undefined}
           aria-invalid={errors.pageNumber ? 'true' : 'false'}
@@ -83,7 +85,7 @@ function QuoteForm({ mode = 'create', onCancel, onSubmit, quote }) {
       </label>
 
       <label className="form-field">
-        <span>یادداشت شخصی</span>
+        <span>{t('quotes.personalNote')}</span>
         <textarea
           value={values.personalNote}
           onChange={(event) => updateField('personalNote', event.target.value)}
@@ -92,10 +94,10 @@ function QuoteForm({ mode = 'create', onCancel, onSubmit, quote }) {
 
       <div className="form-actions">
         <button className="button button-secondary" type="button" onClick={onCancel}>
-          انصراف
+          {t('common.cancel')}
         </button>
         <button className="button button-primary" type="submit">
-          {mode === 'edit' ? 'ذخیره تغییرات' : 'افزودن نقل‌قول'}
+          {mode === 'edit' ? t('common.saveChanges') : t('quotes.add')}
         </button>
       </div>
     </form>
