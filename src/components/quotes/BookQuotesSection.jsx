@@ -11,7 +11,7 @@ import QuoteCard from './QuoteCard'
 import QuoteFormModal from './QuoteFormModal'
 
 function BookQuotesSection({ book, onFeedback, onUpdateBook }) {
-  const { preferences } = usePreferences()
+  const { preferences, t } = usePreferences()
   const [formState, setFormState] = useState({ mode: null, quote: null })
   const [deleteCandidate, setDeleteCandidate] = useState(null)
   const quotes = sortQuotesByCreatedAt(book.quotes ?? [])
@@ -28,7 +28,7 @@ function BookQuotesSection({ book, onFeedback, onUpdateBook }) {
     })
 
     if (result.success) {
-      onFeedback('نقل‌قول با موفقیت اضافه شد.')
+      onFeedback(t('quotes.added'))
       closeForm()
     }
   }
@@ -41,7 +41,7 @@ function BookQuotesSection({ book, onFeedback, onUpdateBook }) {
     }
 
     if (!book.quotes.some((quote) => quote.id === selectedQuote.id)) {
-      onFeedback('نقل‌قول موردنظر پیدا نشد.')
+      onFeedback(t('quotes.notFound'))
       closeForm()
       return
     }
@@ -53,7 +53,7 @@ function BookQuotesSection({ book, onFeedback, onUpdateBook }) {
     })
 
     if (result.success) {
-      onFeedback('تغییرات نقل‌قول ذخیره شد.')
+      onFeedback(t('quotes.changesSaved'))
       closeForm()
     }
   }
@@ -68,7 +68,7 @@ function BookQuotesSection({ book, onFeedback, onUpdateBook }) {
     })
 
     if (result.success) {
-      onFeedback('نقل‌قول حذف شد.')
+      onFeedback(t('quotes.deleted'))
       setDeleteCandidate(null)
     }
   }
@@ -84,7 +84,7 @@ function BookQuotesSection({ book, onFeedback, onUpdateBook }) {
     })
 
     if (result.success) {
-      onFeedback('نقل‌قول حذف شد.')
+      onFeedback(t('quotes.deleted'))
     }
   }
 
@@ -92,15 +92,15 @@ function BookQuotesSection({ book, onFeedback, onUpdateBook }) {
     <section className="details-section quotes-section" aria-labelledby="book-quotes-title">
       <div className="dashboard-item-header">
         <div>
-          <h3 id="book-quotes-title">نقل‌قول‌های کتاب</h3>
-          <p>{formatNumber(quotes.length)} نقل‌قول ذخیره شده</p>
+          <h3 id="book-quotes-title">{t('quotes.title')}</h3>
+          <p>{t('quotes.savedCount', { count: formatNumber(quotes.length) })}</p>
         </div>
         <button
           className="button button-primary"
           type="button"
           onClick={() => setFormState({ mode: 'create', quote: null })}
         >
-          افزودن نقل‌قول
+          {t('quotes.add')}
         </button>
       </div>
 
@@ -117,7 +117,7 @@ function BookQuotesSection({ book, onFeedback, onUpdateBook }) {
         </ul>
       ) : (
         <div className="soft-empty-state">
-          هنوز نقل‌قولی برای این کتاب ثبت نشده است. جمله‌های مهم یا دوست‌داشتنی کتاب را اینجا نگه دار.
+          {t('quotes.empty')}
         </div>
       )}
 
@@ -130,10 +130,10 @@ function BookQuotesSection({ book, onFeedback, onUpdateBook }) {
       />
 
       <ConfirmDialog
-        confirmLabel="حذف نقل‌قول"
+        confirmLabel={t('quotes.delete')}
         isOpen={Boolean(deleteCandidate)}
-        message="آیا از حذف این نقل‌قول مطمئن هستید؟ این کار قابل بازگشت نیست."
-        title="حذف نقل‌قول"
+        message={t('quotes.deleteMessage')}
+        title={t('quotes.delete')}
         onCancel={() => setDeleteCandidate(null)}
         onConfirm={handleDelete}
       />
