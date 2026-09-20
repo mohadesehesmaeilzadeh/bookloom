@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { usePreferences } from '../../context/usePreferences'
 import Modal from '../common/Modal'
 import { getTodayDateString } from '../../utils/dateUtils'
 
@@ -11,6 +12,7 @@ function getInitialValues(book) {
 }
 
 function PurchaseBookModal({ book, isOpen, onClose, onConfirm }) {
+  const { t } = usePreferences()
   const [values, setValues] = useState(() => getInitialValues(book))
   const [errors, setErrors] = useState({})
   const [wasSubmitted, setWasSubmitted] = useState(false)
@@ -28,11 +30,11 @@ function PurchaseBookModal({ book, isOpen, onClose, onConfirm }) {
     const price = Number(nextValues.price)
 
     if (nextValues.price !== '' && (!Number.isFinite(price) || price < 0)) {
-      nextErrors.price = 'قیمت پرداخت‌شده نمی‌تواند منفی باشد.'
+      nextErrors.price = t('wishlist.purchase.priceValidation')
     }
 
     if (!nextValues.purchaseDate) {
-      nextErrors.purchaseDate = 'تاریخ خرید الزامی است.'
+      nextErrors.purchaseDate = t('wishlist.purchase.dateValidation')
     }
 
     return nextErrors
@@ -70,16 +72,16 @@ function PurchaseBookModal({ book, isOpen, onClose, onConfirm }) {
   }
 
   return (
-    <Modal isOpen={isOpen} title="ثبت خرید کتاب" onClose={onClose}>
+    <Modal isOpen={isOpen} title={t('wishlist.purchase.title')} onClose={onClose}>
       <form className="book-form purchase-form" noValidate onSubmit={handleSubmit}>
         <div className="purchase-book-summary">
-          <span>کتاب</span>
+          <span>{t('common.book')}</span>
           <strong>{book?.title}</strong>
         </div>
 
         <div className="form-grid">
           <label className="form-field">
-            <span>تاریخ خرید</span>
+            <span>{t('bookFields.purchaseDate')}</span>
             <input
               aria-describedby={errors.purchaseDate ? 'purchase-date-error' : undefined}
               aria-invalid={errors.purchaseDate ? 'true' : 'false'}
@@ -95,7 +97,7 @@ function PurchaseBookModal({ book, isOpen, onClose, onConfirm }) {
           </label>
 
           <label className="form-field">
-            <span>قیمت پرداخت‌شده</span>
+            <span>{t('wishlist.purchase.paidPrice')}</span>
             <input
               aria-describedby={errors.price ? 'purchase-price-error' : undefined}
               aria-invalid={errors.price ? 'true' : 'false'}
@@ -113,7 +115,7 @@ function PurchaseBookModal({ book, isOpen, onClose, onConfirm }) {
           </label>
 
           <label className="form-field form-field-wide">
-            <span>فروشگاه</span>
+            <span>{t('bookFields.purchaseStore')}</span>
             <input
               type="text"
               value={values.purchaseStore}
@@ -124,10 +126,10 @@ function PurchaseBookModal({ book, isOpen, onClose, onConfirm }) {
 
         <div className="form-actions">
           <button className="button button-secondary" type="button" onClick={onClose}>
-            انصراف
+            {t('common.cancel')}
           </button>
           <button className="button button-primary" type="submit">
-            ثبت خرید
+            {t('wishlist.purchase.submit')}
           </button>
         </div>
       </form>
