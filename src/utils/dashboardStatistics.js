@@ -1,4 +1,5 @@
 import { BOOK_STATUS } from '../constants/bookStatuses'
+import { t } from '../i18n/localization'
 import { calculateReadingProgress, normalizeProgressValues } from './readingProgress'
 
 const libraryStatuses = new Set([
@@ -236,7 +237,7 @@ export function getRecentFinishedBooks(books, limit = 5) {
     .slice(0, limit)
 }
 
-export function getRecentActivity(books, limit = 5) {
+export function getRecentActivity(books, limit = 5, language) {
   const activities = safeArray(books).flatMap((book) => {
     const items = []
 
@@ -244,7 +245,7 @@ export function getRecentActivity(books, limit = 5) {
       items.push({
         id: `${book.id}-progress`,
         book,
-        label: `پیشرفت مطالعه «${book.title}» به‌روزرسانی شده است.`,
+        label: t('dashboard.activity.progressUpdated', { title: book.title }, language),
         timestamp: book.lastProgressUpdate,
       })
     }
@@ -253,7 +254,7 @@ export function getRecentActivity(books, limit = 5) {
       items.push({
         id: `${book.id}-finished`,
         book,
-        label: `کتاب «${book.title}» تمام شده است.`,
+        label: t('dashboard.activity.finished', { title: book.title }, language),
         timestamp: new Date(dateStringTimestamp(book.readingEndDate)).toISOString(),
       })
     }
@@ -262,7 +263,7 @@ export function getRecentActivity(books, limit = 5) {
       items.push({
         id: `${book.id}-started`,
         book,
-        label: `مطالعه «${book.title}» شروع شده است.`,
+        label: t('dashboard.activity.started', { title: book.title }, language),
         timestamp: new Date(dateStringTimestamp(book.readingStartDate)).toISOString(),
       })
     }
@@ -271,7 +272,7 @@ export function getRecentActivity(books, limit = 5) {
       items.push({
         id: `${book.id}-purchase`,
         book,
-        label: `خرید کتاب «${book.title}» ثبت شده است.`,
+        label: t('dashboard.activity.purchased', { title: book.title }, language),
         timestamp: new Date(dateStringTimestamp(book.purchaseDate)).toISOString(),
       })
     }
@@ -280,7 +281,7 @@ export function getRecentActivity(books, limit = 5) {
       items.push({
         id: `${book.id}-updated`,
         book,
-        label: `کتاب «${book.title}» اخیراً به‌روزرسانی شده است.`,
+        label: t('dashboard.activity.updated', { title: book.title }, language),
         timestamp: book.updatedAt,
       })
     }
@@ -289,7 +290,7 @@ export function getRecentActivity(books, limit = 5) {
       items.push({
         id: `${book.id}-created`,
         book,
-        label: `کتاب «${book.title}» اضافه شده است.`,
+        label: t('dashboard.activity.created', { title: book.title }, language),
         timestamp: book.createdAt,
       })
     }
