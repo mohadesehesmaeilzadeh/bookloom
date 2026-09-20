@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef } from 'react'
+import { usePreferences } from '../../context/usePreferences'
 
 let openModalCount = 0
 let previousBodyOverflow = ''
@@ -14,6 +15,7 @@ const focusableSelector = [
 ].join(',')
 
 function Modal({ children, isOpen, onClose, title }) {
+  const { t } = usePreferences()
   const titleId = useId()
   const dialogRef = useRef(null)
   const previousFocusRef = useRef(null)
@@ -79,12 +81,12 @@ function Modal({ children, isOpen, onClose, title }) {
         <div className="modal-header">
           <h2 id={titleId}>{title}</h2>
           <button
-            aria-label="بستن پنجره"
+            aria-label={t('common.closeModal')}
             className="button button-ghost"
             type="button"
             onClick={onClose}
           >
-            بستن
+            {t('common.close')}
           </button>
         </div>
         <div className="modal-body">{children}</div>
