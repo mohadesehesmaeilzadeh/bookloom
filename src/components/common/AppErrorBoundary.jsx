@@ -1,4 +1,5 @@
 import { Component } from 'react'
+import { t } from '../../i18n/localization'
 
 class AppErrorBoundary extends Component {
   constructor(props) {
@@ -19,18 +20,18 @@ class AppErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       return (
-        <main className="app-error-boundary" dir="rtl">
+        <main className="app-error-boundary" dir={document.documentElement.dir || 'rtl'}>
           <section className="empty-state">
-            <h1>مشکلی در نمایش Bookloom پیش آمد.</h1>
+            <h1>{t('errorBoundary.title')}</h1>
             <p>
-              اطلاعات ذخیره‌شده حذف نشده‌اند. صفحه را دوباره بارگذاری کن.
+              {t('errorBoundary.description')}
             </p>
             <button
               className="button button-primary"
               type="button"
               onClick={() => window.location.reload()}
             >
-              بارگذاری دوباره صفحه
+              {t('errorBoundary.reload')}
             </button>
           </section>
         </main>
