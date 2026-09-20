@@ -1,14 +1,17 @@
 import { Link } from 'react-router-dom'
 import { getBookDetailsPath } from '../../constants/routes'
+import { usePreferences } from '../../context/usePreferences'
 import { formatDateTime } from '../../utils/dateUtils'
 
 function RecentActivityList({ activities }) {
+  const { t } = usePreferences()
+
   return (
     <section className="dashboard-section" aria-labelledby="recent-activity-title">
       <div className="library-header">
         <div>
-          <h2 id="recent-activity-title">فعالیت‌های اخیر</h2>
-          <p>این فهرست از داده‌های فعلی کتاب‌ها ساخته می‌شود، نه از یک تاریخچه جداگانه.</p>
+          <h2 id="recent-activity-title">{t('dashboard.activity.title')}</h2>
+          <p>{t('dashboard.activity.description')}</p>
         </div>
       </div>
 
@@ -21,15 +24,15 @@ function RecentActivityList({ activities }) {
                 <span>{formatDateTime(activity.timestamp)}</span>
               </div>
               <Link className="inline-link" to={getBookDetailsPath(activity.book.id)}>
-                جزئیات
+                {t('common.details')}
               </Link>
             </li>
           ))}
         </ul>
       ) : (
         <div className="empty-state">
-          <h3>هنوز فعالیت قابل نمایش وجود ندارد.</h3>
-          <p>با افزودن، به‌روزرسانی یا تمام کردن کتاب‌ها این بخش پر می‌شود.</p>
+          <h3>{t('dashboard.activity.emptyTitle')}</h3>
+          <p>{t('dashboard.activity.emptyDescription')}</p>
         </div>
       )}
     </section>
