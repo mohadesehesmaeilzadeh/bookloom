@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { BOOK_STATUS_ACTION } from '../../constants/bookStatusTransitions'
 import { useBooksContext } from '../../context/useBooksContext'
+import { usePreferences } from '../../context/usePreferences'
 import { createStatusTransitionUpdates } from '../../utils/applyBookStatusTransition'
 import { isBookProgressComplete } from '../../utils/readingProgress'
 import ConfirmDialog from '../common/ConfirmDialog'
@@ -14,6 +15,7 @@ function ProgressUpdateController({
   onProgressSaved,
 }) {
   const { updateBook } = useBooksContext()
+  const { t } = usePreferences()
   const [completionCandidate, setCompletionCandidate] = useState(null)
 
   function handleProgressSubmit(progressValues) {
@@ -26,8 +28,8 @@ function ProgressUpdateController({
     if (result.success) {
       onProgressSaved?.(
         progressValues.totalPages !== book.totalPages
-          ? 'تعداد صفحات کتاب به‌روزرسانی شد.'
-          : 'پیشرفت مطالعه ذخیره شد.',
+          ? t('books.totalPagesUpdated')
+          : t('books.progressSaved'),
       )
       onClose()
 
@@ -54,7 +56,7 @@ function ProgressUpdateController({
     const result = updateBook(completionCandidate.id, updates)
 
     if (result.success) {
-      onFinished?.('کتاب به فهرست تمام‌شده‌ها منتقل شد.')
+      onFinished?.(t('books.movedToFinished'))
       setCompletionCandidate(null)
     }
   }
@@ -69,11 +71,11 @@ function ProgressUpdateController({
       />
 
       <ConfirmDialog
-        cancelLabel="فعلاً نه"
-        confirmLabel="بله، تمام شد"
+        cancelLabel={t('books.completionCancel')}
+        confirmLabel={t('books.completionConfirm')}
         isOpen={Boolean(completionCandidate)}
-        message="به آخرین صفحه این کتاب رسیدی. آیا می‌خواهی کتاب را تمام‌شده علامت بزنی؟"
-        title="پایان مطالعه"
+        message={t('books.completionMessage')}
+        title={t('books.completionTitle')}
         onCancel={() => setCompletionCandidate(null)}
         onConfirm={handleFinishConfirm}
       />
