@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
+import { usePreferences } from '../../context/usePreferences'
 import BookRating from './BookRating'
 
 function BookReviewSection({ disabled = false, onRatingChange, onReviewSave, personalReview = '', rating = 0 }) {
+  const { t } = usePreferences()
   const [isEditing, setIsEditing] = useState(false)
   const [value, setValue] = useState(personalReview)
 
@@ -20,12 +22,12 @@ function BookReviewSection({ disabled = false, onRatingChange, onReviewSave, per
     <section className="details-section editable-text-section" aria-labelledby="book-review-title">
       <div className="dashboard-item-header">
         <div>
-          <h3 id="book-review-title">نظر شخصی من</h3>
-          <p>ثبت نظر بعد از پایان مطالعه مفیدتر است، اما هر زمان می‌توانی آن را بنویسی.</p>
+          <h3 id="book-review-title">{t('review.title')}</h3>
+          <p>{t('review.description')}</p>
         </div>
         {!isEditing ? (
           <button className="button button-secondary" type="button" onClick={() => setIsEditing(true)}>
-            ویرایش نظر
+            {t('review.edit')}
           </button>
         ) : null}
       </div>
@@ -37,7 +39,7 @@ function BookReviewSection({ disabled = false, onRatingChange, onReviewSave, per
       {isEditing ? (
         <div className="book-form">
           <label className="form-field">
-            <span>نظر شخصی من</span>
+            <span>{t('review.title')}</span>
             <textarea value={value} onChange={(event) => setValue(event.target.value)} />
           </label>
           <div className="form-actions">
@@ -49,17 +51,17 @@ function BookReviewSection({ disabled = false, onRatingChange, onReviewSave, per
                 setIsEditing(false)
               }}
             >
-              انصراف
+              {t('common.cancel')}
             </button>
             <button className="button button-primary" type="button" onClick={handleSave}>
-              ذخیره نظر
+              {t('review.save')}
             </button>
           </div>
         </div>
       ) : personalReview ? (
         <p className="preserved-text">{personalReview}</p>
       ) : (
-        <div className="soft-empty-state">هنوز نظر شخصی برای این کتاب ثبت نشده است.</div>
+        <div className="soft-empty-state">{t('review.empty')}</div>
       )}
     </section>
   )
