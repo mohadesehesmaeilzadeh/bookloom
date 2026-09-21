@@ -8,6 +8,7 @@ import {
   hasBookFormErrors,
   validateBookForm,
 } from '../../utils/validateBookForm'
+import OpenLibraryBookSearch from './OpenLibraryBookSearch'
 
 const fieldLabelKeys = {
   title: 'bookFields.title',
@@ -25,7 +26,14 @@ const fieldLabelKeys = {
   notes: 'bookFields.notes',
 }
 
-function BookForm({ book, onCancel, onSubmit, submitLabel, variant = 'default' }) {
+function BookForm({
+  book,
+  enableOnlineSearch = false,
+  onCancel,
+  onSubmit,
+  submitLabel,
+  variant = 'default',
+}) {
   const { language, t } = usePreferences()
   const isWishlistVariant = variant === 'wishlist'
   const bookPriorities = getBookPriorities(language.value)
@@ -49,6 +57,23 @@ function BookForm({ book, onCancel, onSubmit, submitLabel, variant = 'default' }
     setValues(nextValues)
 
     if (wasSubmitted || errors[field]) {
+      setErrors(validateBookForm(nextValues, language.value))
+    }
+  }
+
+  function prefillFromOnlineBook(bookData) {
+    const selectedValues = getInitialBookFormValues(bookData)
+    const nextValues = {
+      ...values,
+      title: selectedValues.title || values.title,
+      author: selectedValues.author || values.author,
+      publisher: selectedValues.publisher || values.publisher,
+      totalPages: selectedValues.totalPages || values.totalPages,
+    }
+
+    setValues(nextValues)
+
+    if (wasSubmitted || Object.keys(errors).length > 0) {
       setErrors(validateBookForm(nextValues, language.value))
     }
   }
@@ -89,6 +114,10 @@ function BookForm({ book, onCancel, onSubmit, submitLabel, variant = 'default' }
 
   return (
     <form className="book-form" noValidate onSubmit={handleSubmit}>
+      {enableOnlineSearch ? (
+        <OpenLibraryBookSearch onSelectBook={prefillFromOnlineBook} />
+      ) : null}
+
       <div className="form-grid">
         <label className="form-field form-field-wide">
           <span>{t(fieldLabelKeys.title)}</span>
