@@ -26,7 +26,7 @@ function BookNotesSection({ notes = '', onSave }) {
         </div>
         {!isEditing ? (
           <button className="button button-secondary" type="button" onClick={() => setIsEditing(true)}>
-            {t('notes.edit')}
+            {t(notes ? 'notes.edit' : 'notes.add')}
           </button>
         ) : null}
       </div>

@@ -5,6 +5,7 @@ import BookNotesSection from '../components/books/BookNotesSection'
 import BookReviewSection from '../components/books/BookReviewSection'
 import ProgressUpdateController from '../components/books/ProgressUpdateController'
 import ReadingProgressBar from '../components/books/ReadingProgressBar'
+import ReadingSessionsSection from '../components/books/ReadingSessionsSection'
 import BookStatusActions from '../components/books/BookStatusActions'
 import ConfirmDialog from '../components/common/ConfirmDialog'
 import FeedbackMessage from '../components/common/FeedbackMessage'
@@ -16,17 +17,15 @@ import { ROUTES } from '../constants/routes'
 import { useBooksContext } from '../context/useBooksContext'
 import { usePreferences } from '../context/usePreferences'
 import { formatDate, formatDateTime } from '../utils/dateUtils'
-import { formatNumber } from '../utils/formatNumber'
+import { formatNumber, formatPlainNumber } from '../utils/formatNumber'
 import { formatPrice } from '../utils/formatPrice'
-import { calculateReadingProgress } from '../utils/readingProgress'
 import { createPurchaseConversionPayload } from '../utils/wishlist/purchaseConversion'
 
 function DetailsList({ rows }) {
-  const { t } = usePreferences()
   const visibleRows = rows.filter(([, value]) => value !== '' && value !== null && value !== undefined)
 
   if (visibleRows.length === 0) {
-    return <p className="muted-note">{t('common.noDisplayData')}</p>
+    return null
   }
 
   return (
@@ -38,6 +37,25 @@ function DetailsList({ rows }) {
         </div>
       ))}
     </dl>
+  )
+}
+
+function BookCover({ book }) {
+  const { t } = usePreferences()
+  const [failed, setFailed] = useState(false)
+
+  return (
+    <div className="book-detail-cover">
+      {book.coverUrl && !failed ? (
+        <img
+          alt={t('details.coverAlt', { title: book.title })}
+          src={book.coverUrl}
+          onError={() => setFailed(true)}
+        />
+      ) : (
+        <span aria-hidden="true" className="book-detail-cover-placeholder" />
+      )}
+    </div>
   )
 }
 
@@ -73,17 +91,15 @@ function BookDetailsPage() {
   const shouldShowProgress =
     canUpdateProgress ||
     (book.status === BOOK_STATUS.FINISHED && book.totalPages > 0)
-  const progress = calculateReadingProgress(book.currentPage, book.totalPages)
   const basicRows = [
-    [t('bookFields.title'), book.title],
-    [t('bookFields.author'), book.author],
-    [t('bookFields.translator'), book.translator],
     [t('bookFields.publisher'), book.publisher],
-    [t('bookFields.category'), book.category],
-    [t('bookFields.status'), getBookStatusLabel(book.status, language.value)],
-    [t('bookFields.priority'), getBookPriorityLabel(book.priority, language.value)],
+    [t('bookFields.publishYear'), book.publishYear > 0 ? formatPlainNumber(book.publishYear) : ''],
+    [t('bookFields.isbn'), book.isbn],
     [t('bookFields.totalPages'), book.totalPages > 0 ? formatNumber(book.totalPages) : ''],
+    [t('bookFields.category'), book.category],
+    [t('bookFields.translator'), book.translator],
   ]
+  const hasBasicInfo = basicRows.some(([, value]) => value !== '' && value !== null && value !== undefined)
   const purchaseRows = [
     [t('bookFields.expectedPrice'), formatPrice(book.expectedPrice)],
     [t('bookFields.price'), formatPrice(book.price)],
@@ -93,10 +109,10 @@ function BookDetailsPage() {
   const readingRows = [
     [t('details.readingStartDate'), formatDate(book.readingStartDate)],
     [t('details.readingEndDate'), formatDate(book.readingEndDate)],
-    [t('bookFields.currentPage'), book.currentPage > 0 ? formatNumber(book.currentPage) : ''],
-    [t('details.readingProgress'), book.totalPages > 0 ? t('common.percent', { value: formatNumber(progress) }) : ''],
     [t('details.progressUpdated'), formatDateTime(book.lastProgressUpdate)],
   ]
+  const hasPurchaseInfo = purchaseRows.some(([, value]) => value !== '' && value !== null && value !== undefined)
+  const hasReadingDates = readingRows.some(([, value]) => value !== '' && value !== null && value !== undefined)
   const metadataRows = [
     [t('details.createdAt'), formatDateTime(book.createdAt)],
     [t('details.updatedAt'), formatDateTime(book.updatedAt)],
@@ -165,12 +181,22 @@ function BookDetailsPage() {
 
   return (
     <section className="book-details-page" aria-labelledby="book-details-title">
-      <div className="library-header">
-        <div>
-          <h2 id="book-details-title">{book.title}</h2>
-          <p>{t('details.description')}</p>
+      <header className="book-detail-header">
+        <div className="book-detail-identity">
+          <BookCover key={book.coverUrl} book={book} />
+          <div className="book-detail-heading">
+            <h2 id="book-details-title">{book.title}</h2>
+            {book.author ? <p className="book-detail-author">{book.author}</p> : null}
+            <div className="book-detail-summary">
+              <span>{getBookStatusLabel(book.status, language.value)}</span>
+              <span>{getBookPriorityLabel(book.priority, language.value)}</span>
+              {book.rating > 0 ? (
+                <span>{t('rating.value', { value: formatNumber(book.rating), total: formatNumber(5) })}</span>
+              ) : null}
+            </div>
+          </div>
         </div>
-        <div className="form-actions">
+        <div className="form-actions book-detail-actions">
           <Link className="button button-secondary" to={ROUTES.LIBRARY}>
             {t('details.backToLibrary')}
           </Link>
@@ -190,23 +216,29 @@ function BookDetailsPage() {
             {t('common.delete')}
           </button>
         </div>
-      </div>
+      </header>
 
       <FeedbackMessage message={feedback} onDismiss={dismissFeedback} />
 
-      <div className="details-section book-details">
-        <h3>{t('details.basicInfo')}</h3>
-        <DetailsList rows={basicRows} />
-      </div>
+      {hasBasicInfo ? (
+        <div className="details-section book-details">
+          <h3>{t('details.basicInfo')}</h3>
+          <DetailsList rows={basicRows} />
+        </div>
+      ) : null}
 
-      {shouldShowProgress ? (
+      {!isWishlistBook ? (
         <div className="details-section">
           <h3>{t('details.readingProgress')}</h3>
-          <ReadingProgressBar
-            currentPage={book.currentPage}
-            showDetails
-            totalPages={book.totalPages}
-          />
+          {shouldShowProgress && (book.totalPages > 0 || book.currentPage > 0) ? (
+            <ReadingProgressBar
+              currentPage={book.currentPage}
+              showDetails
+              totalPages={book.totalPages}
+            />
+          ) : (
+            <p className="soft-empty-state">{t('details.progressEmpty')}</p>
+          )}
           {canUpdateProgress ? (
             <div className="status-actions">
               <button
@@ -220,6 +252,8 @@ function BookDetailsPage() {
           ) : null}
         </div>
       ) : null}
+
+      <ReadingSessionsSection book={book} onFeedback={setFeedback} />
 
       {isWishlistBook ? (
         <div className="details-section">
@@ -244,16 +278,22 @@ function BookDetailsPage() {
         </div>
       )}
 
-      <div className="details-two-column">
-        <div className="details-section book-details">
-          <h3>{t('details.purchaseInfo')}</h3>
-          <DetailsList rows={purchaseRows} />
+      {hasPurchaseInfo || hasReadingDates ? (
+        <div className="details-two-column">
+          {hasPurchaseInfo ? (
+            <div className="details-section book-details">
+              <h3>{t('details.purchaseInfo')}</h3>
+              <DetailsList rows={purchaseRows} />
+            </div>
+          ) : null}
+          {hasReadingDates ? (
+            <div className="details-section book-details">
+              <h3>{t('details.datesAndReading')}</h3>
+              <DetailsList rows={readingRows} />
+            </div>
+          ) : null}
         </div>
-        <div className="details-section book-details">
-          <h3>{t('details.datesAndReading')}</h3>
-          <DetailsList rows={readingRows} />
-        </div>
-      </div>
+      ) : null}
 
       <BookNotesSection notes={book.notes} onSave={handleNotesSave} />
 

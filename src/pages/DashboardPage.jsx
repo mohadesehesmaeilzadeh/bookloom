@@ -1,14 +1,14 @@
-import { useCallback, useMemo, useState } from 'react'
+import { lazy, Suspense, useCallback, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import ProgressUpdateController from '../components/books/ProgressUpdateController'
 import FeedbackMessage from '../components/common/FeedbackMessage'
 import CategorySummary from '../components/dashboard/CategorySummary'
 import ContinueReadingCard from '../components/dashboard/ContinueReadingCard'
 import DailyQuoteCard from '../components/dashboard/DailyQuoteCard'
-import MonthlyFinishedSummary from '../components/dashboard/MonthlyFinishedSummary'
 import ReadingGoalCard from '../components/dashboard/ReadingGoalCard'
 import ReadingGoalModal from '../components/dashboard/ReadingGoalModal'
 import ReadingPagesSummary from '../components/dashboard/ReadingPagesSummary'
+import ReadingAnalyticsSection from '../components/dashboard/ReadingAnalyticsSection'
 import RecentActivityList from '../components/dashboard/RecentActivityList'
 import RecentBooksList from '../components/dashboard/RecentBooksList'
 import StatisticCard from '../components/dashboard/StatisticCard'
@@ -30,6 +30,9 @@ import {
 } from '../utils/dashboardStatistics'
 import { getDailyBookQuote } from '../utils/bookQuotes'
 import { formatNumber } from '../utils/formatNumber'
+import { getReadingAnalytics } from '../utils/readingAnalytics'
+
+const MonthlyFinishedSummary = lazy(() => import('../components/dashboard/MonthlyFinishedSummary'))
 
 function DashboardPage() {
   const { books } = useBooksContext()
@@ -46,6 +49,7 @@ function DashboardPage() {
       continueReadingBook: getContinueReadingBook(books),
       monthlyFinished: getBooksFinishedByMonth(books, currentYear),
       pagesSummary: getReadingPagesSummary(books),
+      readingAnalytics: getReadingAnalytics(books),
       recentActivity: getRecentActivity(books, 5, language.value),
       recentBooks: getRecentBooks(books),
       recentFinishedBooks: getRecentFinishedBooks(books),
@@ -144,6 +148,8 @@ function DashboardPage() {
         ))}
       </div>
 
+      <ReadingAnalyticsSection analytics={dashboardData.readingAnalytics} />
+
       <FeedbackMessage message={feedback} onDismiss={dismissFeedback} />
 
       <section className="dashboard-section" aria-labelledby="continue-reading-title">
@@ -176,7 +182,9 @@ function DashboardPage() {
       <ReadingPagesSummary summary={dashboardData.pagesSummary} />
       <RecommendationEntryCard onFeedback={setFeedback} />
       <DailyQuoteCard quoteItem={dashboardData.dailyQuote} />
-      <MonthlyFinishedSummary months={dashboardData.monthlyFinished} />
+      <Suspense fallback={null}>
+        <MonthlyFinishedSummary months={dashboardData.monthlyFinished} />
+      </Suspense>
       <RecentActivityList activities={dashboardData.recentActivity} />
 
       <div className="dashboard-two-column">

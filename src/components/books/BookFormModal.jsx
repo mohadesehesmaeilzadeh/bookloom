@@ -21,6 +21,7 @@ function BookFormModal({ book, isOpen, mode, onClose, onSubmit, variant = 'defau
     >
       <BookForm
         book={isEditing ? book : null}
+        enableOnlineSearch={!isEditing && !isWishlistVariant}
         submitLabel={
           isEditing
             ? t('common.saveChanges')

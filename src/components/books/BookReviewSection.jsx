@@ -27,7 +27,7 @@ function BookReviewSection({ disabled = false, onRatingChange, onReviewSave, per
         </div>
         {!isEditing ? (
           <button className="button button-secondary" type="button" onClick={() => setIsEditing(true)}>
-            {t('review.edit')}
+            {t(personalReview ? 'review.edit' : 'review.add')}
           </button>
         ) : null}
       </div>
