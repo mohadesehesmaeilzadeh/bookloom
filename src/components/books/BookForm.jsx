@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { getBookPriorities } from '../../constants/bookPriorities'
 import { BOOK_STATUS, getBookStatuses } from '../../constants/bookStatuses'
 import { usePreferences } from '../../context/usePreferences'
+import { useBooksContext } from '../../context/useBooksContext'
+import { findDuplicateBook } from '../../utils/findDuplicateBook'
 import {
   createBookFormPayload,
   getInitialBookFormValues,
@@ -13,6 +15,8 @@ import OpenLibraryBookSearch from './OpenLibraryBookSearch'
 const fieldLabelKeys = {
   title: 'bookFields.title',
   author: 'bookFields.author',
+  isbn: 'bookFields.isbn',
+  publishYear: 'bookFields.publishYear',
   translator: 'bookFields.translator',
   publisher: 'bookFields.publisher',
   category: 'bookFields.category',
@@ -35,17 +39,20 @@ function BookForm({
   variant = 'default',
 }) {
   const { language, t } = usePreferences()
+  const { books } = useBooksContext()
   const isWishlistVariant = variant === 'wishlist'
   const bookPriorities = getBookPriorities(language.value)
   const bookStatuses = getBookStatuses(language.value)
   const [values, setValues] = useState(() => getInitialBookFormValues(book))
   const [errors, setErrors] = useState({})
   const [wasSubmitted, setWasSubmitted] = useState(false)
+  const [duplicate, setDuplicate] = useState(null)
 
   useEffect(() => {
     setValues(getInitialBookFormValues(book))
     setErrors({})
     setWasSubmitted(false)
+    setDuplicate(null)
   }, [book])
 
   function updateField(field, value) {
@@ -55,6 +62,7 @@ function BookForm({
     }
 
     setValues(nextValues)
+    setDuplicate(null)
 
     if (wasSubmitted || errors[field]) {
       setErrors(validateBookForm(nextValues, language.value))
@@ -67,11 +75,15 @@ function BookForm({
       ...values,
       title: selectedValues.title || values.title,
       author: selectedValues.author || values.author,
+      isbn: selectedValues.isbn || values.isbn,
+      coverUrl: selectedValues.coverUrl || values.coverUrl,
+      publishYear: selectedValues.publishYear || values.publishYear,
       publisher: selectedValues.publisher || values.publisher,
       totalPages: selectedValues.totalPages || values.totalPages,
     }
 
     setValues(nextValues)
+    setDuplicate(null)
 
     if (wasSubmitted || Object.keys(errors).length > 0) {
       setErrors(validateBookForm(nextValues, language.value))
@@ -102,6 +114,12 @@ function BookForm({
     }
 
     const payload = createBookFormPayload(values)
+    const existingBook = findDuplicateBook(payload, books, book?.id)
+
+    if (existingBook) {
+      setDuplicate(existingBook)
+      return
+    }
 
     if (isWishlistVariant) {
       payload.status = BOOK_STATUS.WISHLIST
@@ -116,6 +134,12 @@ function BookForm({
     <form className="book-form" noValidate onSubmit={handleSubmit}>
       {enableOnlineSearch ? (
         <OpenLibraryBookSearch onSelectBook={prefillFromOnlineBook} />
+      ) : null}
+
+      {duplicate ? (
+        <p className="field-error" role="alert">
+          {t('validation.book.duplicate', { title: duplicate.title })}
+        </p>
       ) : null}
 
       <div className="form-grid">
@@ -133,6 +157,16 @@ function BookForm({
         </label>
 
         <TextField field="author" value={values.author} onChange={updateField} />
+        <TextField field="isbn" value={values.isbn} onChange={updateField} />
+        <NumberField
+          error={errors.publishYear}
+          field="publishYear"
+          max="9999"
+          min="1"
+          step="1"
+          value={values.publishYear}
+          onChange={updateField}
+        />
         <TextField
           field="translator"
           value={values.translator}
@@ -253,7 +287,7 @@ function TextField({ field, label, onChange, value }) {
   )
 }
 
-function NumberField({ error, field, onChange, step = 'any', value }) {
+function NumberField({ error, field, max, min = '0', onChange, step = 'any', value }) {
   const { t } = usePreferences()
 
   return (
@@ -262,7 +296,8 @@ function NumberField({ error, field, onChange, step = 'any', value }) {
       <input
         aria-describedby={error ? `${field}-error` : undefined}
         aria-invalid={error ? 'true' : 'false'}
-        min="0"
+        max={max}
+        min={min}
         step={step}
         type="number"
         value={value}
