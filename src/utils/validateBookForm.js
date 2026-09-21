@@ -8,6 +8,9 @@ import { t } from '../i18n/localization'
 export const emptyBookFormValues = {
   title: '',
   author: '',
+  isbn: '',
+  coverUrl: '',
+  publishYear: '',
   translator: '',
   publisher: '',
   category: '',
@@ -22,6 +25,7 @@ export const emptyBookFormValues = {
 }
 
 const numericFieldMessages = {
+  publishYear: 'validation.book.publishYearInvalid',
   totalPages: 'validation.book.totalPagesNonNegative',
   price: 'validation.book.priceNonNegative',
   expectedPrice: 'validation.book.priceNonNegative',
@@ -53,6 +57,9 @@ export function getInitialBookFormValues(book) {
   return {
     title: book.title ?? '',
     author: book.author ?? '',
+    isbn: book.isbn ?? '',
+    coverUrl: book.coverUrl ?? '',
+    publishYear: toInputNumber(book.publishYear),
     translator: book.translator ?? '',
     publisher: book.publisher ?? '',
     category: book.category ?? '',
@@ -82,6 +89,11 @@ export function validateBookForm(values, language) {
     }
   }
 
+  if (values.publishYear !== '' &&
+    (!Number.isInteger(Number(values.publishYear)) || Number(values.publishYear) < 1 || Number(values.publishYear) > 9999)) {
+    errors.publishYear = t(numericFieldMessages.publishYear, undefined, language)
+  }
+
   if (!bookStatusValues.includes(values.status)) {
     errors.status = t('validation.book.statusInvalid', undefined, language)
   }
@@ -101,6 +113,9 @@ export function createBookFormPayload(values) {
   return {
     title: values.title.trim(),
     author: values.author.trim(),
+    isbn: values.isbn.trim(),
+    coverUrl: values.coverUrl,
+    publishYear: values.publishYear === '' ? 0 : Number(values.publishYear),
     translator: values.translator.trim(),
     publisher: values.publisher.trim(),
     category: values.category.trim(),
