@@ -1,147 +1,78 @@
 # Bookloom
 
-Bookloom is a Persian, right-to-left personal library manager built with React and Vite. It runs entirely in the browser and stores data locally, so it does not require a backend server or user account for everyday use.
+A personal library for tracking books, reading progress, and the habits that grow around them. Bookloom is a local-first React app: everyday use requires no account or backend, and your library stays in your browser. The interface supports both English (LTR) and Persian (RTL).
+
+![Bookloom dashboard showing library and reading analytics](docs/images/dashboard.png)
+
+> Screenshots use fictional sample data. No personal library data is included in this repository.
 
 ## Features
 
-- Dashboard with real book counts, reading goals, reading statistics, and next-book recommendations
-- Full book CRUD: add, edit, view details, and delete books
-- React Router pages for dashboard, library, reading, wishlist, finished books, statistics, settings, and routed book details
-- Centralized book statuses: wishlist, owned, reading, paused, finished, and abandoned
-- Reading workflows: start, pause, resume, finish, and abandon books
-- Reading progress tracking with current page, total pages, percentage, remaining pages, and last progress update
-- Wishlist workflow with priority, estimated price, suggested store, and purchase conversion
-- Search, filtering, sorting, and grid/list view modes
-- Personal notes, reviews, ratings, and quotes
-- Local next-book recommendation logic
-- JSON backup, restore, merge, duplicate handling, and safe reset
-- Application settings for theme, accent color, default start page, digit display, and delete confirmation
-- Responsive RTL layout for Persian users
+- **Organize your library:** Add, edit, and delete books; move them between wishlist, owned, reading, paused, finished, and abandoned states; search, filter, and sort your collection.
+- **Add books your way:** Enter a book manually or search [Open Library](https://openlibrary.org/developers/api) by title, author, or ISBN. Selecting a search result prefills the existing form; it does not save the book until you confirm. Duplicate warnings check ISBN first, then normalized title and author when an ISBN is missing.
+- **Track reading:** Record current page and progress, run one reading-session timer at a time, optionally add pages read when stopping, and review session history. An active session survives a page refresh.
+- **Understand your reading:** See books finished this month and year, estimated pages read, logged reading time, average rating, favorite category, and a streak calculated from session dates. A monthly chart shows finished books across the current year.
+- **Keep the details:** Save notes, quotes, reviews, and ratings; set an annual reading goal and get a local next-book recommendation.
+- **Take your data with you:** Export a JSON backup, restore by replacing or merging data, and reset Bookloom data from Settings.
+- **Make it yours:** Switch language, theme, accent color, start page, and Persian or Latin digits.
 
-## Tech Stack
+![Book details with reading progress and session history](docs/images/book-details.png)
 
-- React 19
-- React DOM
-- React Router
-- Vite
-- Oxlint
-- Plain CSS with global CSS variables
-- LocalStorage for persistence
+## Quick start
 
-## Requirements
-
-You need Node.js and npm installed.
-
-## Installation
+You need npm and Node.js `20.19+` or `22.12+`. From the project root:
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
-After starting the development server, open the local URL printed by Vite. It is usually:
+Open the local URL printed by Vite, usually `http://localhost:5173/`. If that port is busy, Vite will choose another one.
 
-```text
-http://localhost:5173
-```
-
-## Scripts
-
-```bash
-npm run dev
-```
-
-Start the Vite development server.
+To build and preview the production version:
 
 ```bash
 npm run build
-```
-
-Build the production version into `dist`.
-
-```bash
 npm run preview
 ```
 
-Preview the production build locally.
+## Commands
 
-```bash
-npm run lint
-```
-
-Run Oxlint.
-
-## App Routes
-
-| Route | Page |
+| Command | Purpose |
 | --- | --- |
-| `/` | Dashboard |
-| `/library` | My Library |
-| `/reading` | Currently Reading |
-| `/wishlist` | Wishlist |
-| `/finished` | Finished Books |
-| `/statistics` | Reading Statistics |
-| `/settings` | Settings |
-| `/books/:bookId` | Book Details |
+| `npm run dev` | Start the development server |
+| `npm run lint` | Run Oxlint |
+| `npm test` | Run Vitest in watch mode |
+| `npm run test:run` | Run the test suite once |
+| `npm run build` | Build the app into `dist/` |
+| `npm run preview` | Preview the production build |
 
-## Project Structure
+The test suite covers book CRUD, duplicate detection, progress and status transitions, reading-session persistence, analytics, Open Library responses, and backup validation and restore logic.
+
+## Data and privacy
+
+Bookloom stores data in `localStorage` on the current browser and device. Its main keys are `bookloom_books`, `bookloom_reading_goals`, and `bookloom_preferences`; `bookloom_collection_preferences` is retained for compatibility with older settings. Clearing browser data can erase your library, so export a JSON backup from **Settings** before switching devices or clearing storage.
+
+Online search is optional. When you search, the query is sent to Open Library, and online cover images are loaded from Open Library's cover service. Manual entry works without it. Bookloom does not provide cloud sync or user accounts.
+
+Backup files include books and their reading sessions, reading goals, and preferences. **Replace** swaps current Bookloom data for the backup. **Merge** combines books by ID and keeps the record with the newer `updatedAt` value when IDs match.
+
+## Project layout
 
 ```text
 src/
-  components/   Reusable UI components
-  constants/    Routes, statuses, priorities, settings, and shared constants
-  context/      BooksContext, PreferencesContext, and ToastContext
-  hooks/        Book, goal, recommendation, and collection-control hooks
-  layouts/      Main application layout
+  components/   Book forms, shared UI, and dashboard sections
   pages/        Routed application pages
-  styles/       Global styles
-  utils/        Validation, persistence, backup, sorting, filtering, and formatting utilities
+  hooks/        Book and reading-goal state
+  context/      Shared books and preferences
+  services/     Open Library search
+  utils/        Normalization, analytics, validation, and backup logic
+  i18n/         English and Persian copy
+  styles/       Global and responsive styles
 ```
 
-## Data Persistence
+The main stack is React 19, React Router, Vite, Recharts, Vitest, React Testing Library, and plain CSS.
 
-Bookloom stores data in the browser's LocalStorage. The main Bookloom-owned keys are:
+## Current scope
 
-- `bookloom_books`
-- `bookloom_reading_goals`
-- `bookloom_preferences`
-- `bookloom_collection_preferences` for compatibility with older stored view-mode preferences
-
-Use the Settings page to export a JSON backup before clearing browser data or moving to another device.
-
-## Backup and Restore
-
-Bookloom backups include books, reading goals, and application preferences.
-
-Restore supports two modes:
-
-- Replace: replace current Bookloom data with the selected backup.
-- Merge: combine the backup with current data and keep the newest duplicate book record based on `updatedAt`.
-
-The full data reset flow requires typed confirmation and removes only Bookloom-owned storage keys.
-
-## Settings and Personalization
-
-The Settings page supports:
-
-- Light, dark, and system themes
-- Accent color selection
-- Default start page
-- Persian or Latin digit display
-- Delete-confirmation preference
-- Resetting preferences without deleting books
-
-## Development Notes
-
-- Book statuses and priorities are centralized in `src/constants`.
-- Data validation and normalization live in `src/utils`.
-- Pages do not access LocalStorage directly; persistence goes through storage utilities and React context.
-- Older Phase 10 backup files are normalized and migrated where possible.
-
-## Current Limitations
-
-Bookloom is a local-first browser app. It does not currently include cloud sync, authentication, external book APIs, Electron packaging, desktop file access, or reading timers.
-
-## License
-
-No license has been specified yet.
+Bookloom is local-first, not a cross-device sync service. The standalone `/statistics` route is still a placeholder; working analytics and the monthly chart are on the dashboard. No license has been specified for this repository yet.
