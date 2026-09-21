@@ -5,10 +5,13 @@ import {
 import { DEFAULT_BOOK_STATUS, bookStatusValues } from '../constants/bookStatuses'
 import { generateId } from './generateId'
 import { normalizeQuotes } from './quoteValidation'
+import { normalizeReadingSessions } from './readingSessions'
 
 const stringFields = [
   'title',
   'author',
+  'isbn',
+  'coverUrl',
   'translator',
   'publisher',
   'category',
@@ -23,6 +26,9 @@ const stringFields = [
 const defaultBookValues = {
   title: '',
   author: '',
+  isbn: '',
+  coverUrl: '',
+  publishYear: 0,
   translator: '',
   publisher: '',
   category: '',
@@ -40,6 +46,8 @@ const defaultBookValues = {
   notes: '',
   personalReview: '',
   quotes: [],
+  readingSessions: [],
+  activeReadingSessionStartedAt: '',
   lastProgressUpdate: '',
 }
 
@@ -109,6 +117,7 @@ export function normalizeBook(book, options = {}) {
     ? source.priority
     : DEFAULT_BOOK_PRIORITY
   normalized.totalPages = normalizePageNumber(source.totalPages)
+  normalized.publishYear = normalizePageNumber(source.publishYear)
   normalized.currentPage = normalizePageNumber(source.currentPage)
 
   if (normalized.totalPages > 0 && normalized.currentPage > normalized.totalPages) {
@@ -119,6 +128,12 @@ export function normalizeBook(book, options = {}) {
   normalized.price = normalizeNonNegativeNumber(source.price)
   normalized.expectedPrice = normalizeNonNegativeNumber(source.expectedPrice)
   normalized.quotes = normalizeQuotes(source.quotes, { now })
+  normalized.readingSessions = normalizeReadingSessions(source.readingSessions)
+  normalized.activeReadingSessionStartedAt =
+    typeof source.activeReadingSessionStartedAt === 'string' &&
+    Number.isFinite(Date.parse(source.activeReadingSessionStartedAt))
+      ? source.activeReadingSessionStartedAt
+      : ''
   normalized.lastProgressUpdate = isValidTimestamp(source.lastProgressUpdate)
     ? source.lastProgressUpdate
     : ''
