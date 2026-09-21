@@ -24,6 +24,15 @@ function firstString(value) {
   return normalizeString(value)
 }
 
+function pickIsbn(value, searchedIsbn) {
+  const isbns = Array.isArray(value) ? value : [value]
+  const normalizedQuery = searchedIsbn.replace(/[\s-]/g, '').toUpperCase()
+
+  return isbns.find((isbn) =>
+    typeof isbn === 'string' && isbn.replace(/[\s-]/g, '').toUpperCase() === normalizedQuery
+  ) ?? firstString(value)
+}
+
 function normalizePositiveInteger(value) {
   const number = Number(value)
 
@@ -51,6 +60,7 @@ function buildSearchUrl(query, searchType) {
       'key',
       'title',
       'author_name',
+      'isbn',
       'first_publish_year',
       'cover_i',
       'publisher',
@@ -70,7 +80,7 @@ function buildSearchUrl(query, searchType) {
   return `${OPEN_LIBRARY_SEARCH_URL}?${params.toString()}`
 }
 
-export function normalizeOpenLibraryBook(doc) {
+export function normalizeOpenLibraryBook(doc, searchedIsbn = '') {
   if (!isRecord(doc)) {
     return null
   }
@@ -82,6 +92,7 @@ export function normalizeOpenLibraryBook(doc) {
   }
 
   const author = firstString(doc.author_name)
+  const isbn = pickIsbn(doc.isbn, searchedIsbn)
   const publisher = firstString(doc.publisher)
   const totalPages = normalizePositiveInteger(doc.number_of_pages_median)
 
@@ -95,6 +106,9 @@ export function normalizeOpenLibraryBook(doc) {
     book: {
       title,
       author,
+      isbn,
+      coverUrl: getCoverUrl(doc.cover_i) ?? '',
+      publishYear: normalizePublishYear(doc.first_publish_year) ?? 0,
       publisher,
       totalPages,
     },
@@ -119,5 +133,7 @@ export async function searchOpenLibraryBooks(query, searchType, options = {}) {
   const data = await response.json()
   const docs = Array.isArray(data.docs) ? data.docs : []
 
-  return docs.map(normalizeOpenLibraryBook).filter(Boolean)
+  const searchedIsbn = searchType === OPEN_LIBRARY_SEARCH_TYPES.ISBN ? trimmedQuery : ''
+
+  return docs.map((doc) => normalizeOpenLibraryBook(doc, searchedIsbn)).filter(Boolean)
 }
